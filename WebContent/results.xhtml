@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<!-- 	needed for java script and primefaces fileupload advanced -->
+	<title>WebHERV - Results</title>
+</h:head>
+
+<body>
+	<h:outputStylesheet library="css" name="style.css" />
+	<!-- Header of the page -->
+	<h1 id="mainHeadline">WebHERV results</h1>
+
+	<h:form id="resultsForm" enctype="multipart/form-data">
+
+		<h:panelGrid columns="2" cellpadding="0">
+			
+			<h:outputLabel for="platform" value="Platform:" rendered="#{not userInput.selectedByGenome}"/>
+			<h:outputText id="platform" value="#{userInput.selectedPlatform}"  rendered="#{not userInput.selectedByGenome}"/>
+			<h:outputLabel for="genome" value="Genome:" rendered="#{userInput.selectedByGenome}"/>
+			<h:outputText id="genome" value="#{userInput.selectedGenome}"  rendered="#{userInput.selectedByGenome}"/>
+			
+			<h:outputLabel for="eValue" value="E-value:" />
+			<h:outputText id="eValue" value="1.0E-#{userInput.maxEvalueExp}" />
+			<h:outputLabel for="minLen" value="Min-length:" />
+			<h:outputText id="minLen" value="#{userInput.minimalLength}" />
+			<h:outputLabel for="blast" value="Blast version:" />
+			<h:outputText id="blast" value="#{webHervSettings.blastVersion}" />
+		</h:panelGrid>
+
+		<p:tabView value="#{resultsView.resultsTabs}" var="tab"
+			id="resultsTabView">
+			<p:tab title="File - #{tab.id}">
+
+				<h:panelGrid columns="2" cellpadding="0">
+					<h:outputLabel for="totUploadedProbs" value="Total uploaded:" />
+					<h:outputText id="totUploadedProbs" value="#{tab.totalNumGenes}" />
+					<h:outputLabel for="uploadedProbs" value="Uploaded:" />
+					<h:outputText id="uploadedProbs" value="#{tab.knownNumGenes}" />
+					<h:outputLabel for="withResultsProbs" value="With results:" />
+					<ui:repeat value="#{tab.resultsNumGenes}" var="pair">
+    					#{pair.left}:#{pair.right}
+					</ui:repeat>
+				</h:panelGrid>
+
+				<h:panelGrid columns="2" cellpadding="0">
+					<h:outputText value="Hide unknown probe sets: " />
+					<p:selectBooleanCheckbox value="#{tab.hideUnknownGenes}">
+						<p:ajax update=":resultsForm:resultsTabView:basicDT"
+							listener="#{tab.updateFilteredGenes}" />
+					</p:selectBooleanCheckbox>
+					<h:outputText value="Hide probe sets without hits: " />
+					<p:selectBooleanCheckbox value="#{tab.hideGenesWoResults}">
+						<p:ajax update=":resultsForm:resultsTabView:basicDT"
+							listener="#{tab.updateFilteredGenes}" />
+					</p:selectBooleanCheckbox>
+				</h:panelGrid>
+
+				<h:commandLink>
+					<p:graphicImage value="resources/images/csv.png" />
+					<p:dataExporter type="csv" target="basicDT"
+						fileName="#{tab.id}_hervs"  />
+				</h:commandLink>
+
+				<!-- Gene results / HERVs -->
+				<p:dataTable id="basicDT" var="gene" value="#{tab.filteredGenes}"
+					style="table-layout: auto;" rowIndexVar="rowId"
+					rows="50" paginator="true" 
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="50,100,200,500" >
+
+					<p:column headerText="num">
+						<h:outputText value="#{rowId}" />
+					</p:column>
+					
+					<p:column headerText="Probe set ID">
+						<h:outputText value="#{gene.id}" />
+					</p:column>
+
+					<p:columns value="#{tab.columns}" var="column"
+						columnIndexVar="colIndex">
+						<f:facet name="header">
+							<h:outputText value="#{column.header}" />
+						</f:facet>
+						<p:commandLink update=":resultsForm:geneDetail"
+							oncomplete="PF('dlg1').show()"
+							value="#{gene.offsetHervHits[column.property].hervHitsSize}">
+							<f:setPropertyActionListener value="#{gene}"
+								target="#{geneSelectionView.selectedGene}" />
+							<f:setPropertyActionListener value="#{column.property}"
+								target="#{geneSelectionView.selectedOffset}" />
+						</p:commandLink>
+					</p:columns>
+
+				</p:dataTable>
+
+			</p:tab>
+		</p:tabView>
+
+		<!-- === Herv Dialog ==================================================== -->
+		<p:dialog header="Hits in distance (#{geneSelectionView.selectedOffset}) of probe set:#{geneSelectionView.selectedGene.id}" widgetVar="dlg1" id="geneDetail"
+			minHeight="40" width="700">
+
+			<p:panelGrid columns="2">
+				<h:outputText value="Chromosome:" />
+				<h:outputText
+					value="#{geneSelectionView.selectedGene.geneEntry.chromosome}" />
+
+				<h:outputText value="Start:" />
+				<h:outputText
+					value="#{geneSelectionView.selectedGene.geneEntry.start}" />
+
+				<h:outputText value="End:" />
+				<h:outputText
+					value="#{geneSelectionView.selectedGene.geneEntry.end}" />
+
+				<h:outputText value="Strand:" />
+				<h:outputText
+					value="#{geneSelectionView.selectedGene.geneEntry.strand}" />
+
+			</p:panelGrid>
+
+
+			<!-- === HERVs in offset table: ===================================== -->
+			<p:dataTable id="hervHitDT" var="hervHit"
+				value="#{geneSelectionView.selectedGene.offsetHervHits[geneSelectionView.selectedOffset].hervHits}"
+				scrollable="true" scrollHeight="350">
+				<p:column headerText="HERV ID">
+					<h:outputText value="#{hervHit.id}" />
+				</p:column>
+				<p:column headerText="Chromosome">
+					<h:outputText value="#{hervHit.chromosome}" />
+				</p:column>
+				<p:column headerText="Start">
+					<h:outputText value="#{hervHit.startChromosome}" />
+				</p:column>
+				<p:column headerText="End">
+					<h:outputText value="#{hervHit.endChromosome}" />
+				</p:column>
+				<p:column headerText="Strand">
+					<h:outputText value="#{hervHit.chromStrand}" />
+				</p:column>
+				<p:column headerText="e-value">
+					<h:outputText value="#{hervHit.eValue}" />
+				</p:column>
+			</p:dataTable>
+			<!-- == Close dialog button ====================================== -->
+			<p:commandButton value="Close" onclick="PF('dlg1').hide()" />
+
+		</p:dialog>
+		<!-- === End Hervs dialog ============================================ -->
+
+	</h:form>
+
+
+</body>
+</html>

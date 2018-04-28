@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<!-- 	needed for java script and primefaces fileupload advanved -->
+	<title>WebHERV - Start</title>
+</h:head>
+
+<h:body id="entirePage">
+
+	<h:outputStylesheet library="css" name="style.css" />
+
+	<p:blockUI block=":entirePage" widgetVar="bui" />
+
+	<p:growl id="growl" showDetail="true" sticky="true" />
+
+	<!-- Header of the page -->
+	<h1 id="mainHeadline">WebHERV</h1>
+
+	<!-- main description  -->
+	<p:panel id="explainPanel">
+		<p id="explainPara">This program enables you to calculate the
+			association between human endogenous retroviruses (HERVs) and DNA
+			microarray-based gene expression data (the current version accepts
+			only Affymetrix Human Exon 1.0 ST arrays. The server allows uploading
+			of files with probe set IDs and the program will analyze each file
+			separately for HERV sequences located in the neighborhood of these
+			probe sets.</p>
+		<p id="expl_link">For detailed information see Kruse K, Nettling
+			M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018.
+			WebHERV: A web-server for the computational investigation of gene
+			expression associated with human endogeneous retroviruses. Front
+			Immunol. submitted.</p>
+	</p:panel>
+
+	<h:form name="settingsForm" enctype="multipart/form-data">
+
+		<p:panelGrid header="Parameter settings" styleClass="settingsPanel"
+			style="margin-top:20px">
+
+			<!--  layout="grid" -->
+			<f:facet name="header" styleClass="settingsPanel">
+				<p:row>
+					<p:column>Settings</p:column>
+					<p:column>Descriptions</p:column>
+				</p:row>
+			</f:facet>
+
+			<!-- 			<p:row> -->
+			<!-- 				<p:column> -->
+			<!-- 					<h:outputLabel for="variants" value="Variants:" /> -->
+			<!-- 					<p:selectOneRadio id="variants" columns="2" -->
+			<!-- 						value="#{userInput.selectedVariant}"> -->
+			<!-- 						<f:selectItems var="v" value="#{userInput.variants}" -->
+			<!-- 							itemLabel="#{v.label}" itemValue="#{v.id}" /> -->
+			<!-- 					</p:selectOneRadio> -->
+			<!-- 				</p:column> -->
+			<!-- 				<p:column> -->
+			<!-- 					The user can select here between the two variants of association. -->
+			<!-- 					Variant 1 searches for HERVs in the offset around the probeset. -->
+			<!-- 					Variant 2 searches the next located HERV. -->
+			<!-- 				</p:column> -->
+			<!-- 			</p:row> -->
+
+			<!-- 			<p:row> -->
+			<!-- 				<p:column colspan="2" styleClass="ui-widget-header"> -->
+			<!-- 					<p:spacer height="0" /> -->
+			<!-- 				</p:column> -->
+			<!-- 			</p:row> -->
+
+			<p:row>
+				<p:column>
+					<h:outputLabel for="ranges" value="Area:" />
+					<p:selectOneRadio id="ranges" value="#{userInput.selectedRange}"
+						layout="pageDirection" style="width:125px margin-bottom:10px"
+						cellpadding="5">
+						<f:selectItems var="range" value="#{userInput.ranges}"
+							itemLabel="#{range.value}" itemValue="#{range.value}" />
+					</p:selectOneRadio>
+				</p:column>
+				<p:column styleClass="col_description">The 'Area' defines the region around the probe set (with regards to the orientation of the probe set) in which the program will search for HERV sequences.
+				<ul>
+						<li>Area 'overlap': the program will search for HERV
+							sequences upstream and downstream of the probe set.</li>
+						<li>Area 'downstream': the program will only look for HERV
+							sequences downstream (3') of the probe set.</li>
+						<li>Area 'upstream', the program will only look for HERV
+							sequences upstream (5') of the probe set.</li>
+					</ul>
+
+				</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column colspan="2">
+
+				</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column>
+					<h:outputLabel for="rangeSize" value="Distance:" />
+					<br />
+					<p:inputText id="rangeSize" value="#{userInput.offset}"
+						validatorMessage="Range size must a '#{userInput.offsetListSeparator}' separated list of numbers.">
+						<f:validateRegex pattern="#{userInput.offsetListRegex}" />
+						<p:clientValidator event="keyup" />
+					</p:inputText>
+					<p:message for="rangeSize" display="icon" />
+				</p:column>
+				<p:column styleClass="col_description">'Distance' defines the region (in base pairs) of the DNA around the probe sets which is analyzed for presence of HERV sequences. It is possible to enter a ','-separated list of numbers to analyze multiple distances at once (e.g.: 100, 1000, 10000).</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column colspan="2">
+
+				</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column>
+					<h:outputLabel for="minimalLength" value="Minimal sequence length:" />
+					<br />
+					<p:inputText id="minimalLength"
+						validatorMessage="Minimal sequence length must be greater #{userInput.minimalLengthMin}!"
+						value="#{userInput.minimalLength}">
+						<f:validateDoubleRange minimum="#{userInput.minimalLengthMin}"
+							maximum="#{userInput.minimalLengthMax}" />
+						<p:clientValidator event="keyup" />
+					</p:inputText>
+					<p:message for="minimalLength" display="icon" />
+				</p:column>
+				<p:column styleClass="col_description">The 'Minimal sequence length' is the length that a (putative) HERV-derived sequence must have.</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column colspan="2">
+
+				</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column>
+					<h:outputLabel for="maxEvalue" value="Maximal HERV e-value:" />
+					<br />
+					<h:outputLabel for="maxEvalue" value="1.0E-" />
+					<p:inputText id="maxEvalue" value="#{userInput.maxEvalueExp}"
+						validatorMessage="Maximal e-value must be between #{userInput.maxEvalueExpMin} and #{userInput.maxEvalueExpMax}!">
+						<f:validateDoubleRange minimum="#{userInput.maxEvalueExpMin}"
+							maximum="#{userInput.maxEvalueExpMax}" />
+						<p:clientValidator event="keyup" />
+					</p:inputText>
+					<p:message for="maxEvalue" display="icon" />
+				</p:column>
+				<p:column styleClass="col_description">The "Maximal HERV e-value" is the expect value that is allowed for a sequnces to be considered as HERV drived.</p:column>
+			</p:row>
+
+			<p:row>
+				<p:column colspan="2">
+
+				</p:column>
+			</p:row>
+
+<!-- 			<p:row> -->
+<!-- 				<p:column> -->
+<!-- 					<h:outputLabel for="platformItem" value="Platform:" /> -->
+<!-- 					<br /> -->
+<!-- 					<p:selectOneMenu id="platformItem" -->
+<!-- 						value="#{userInput.selectedPlatform}"> -->
+<!-- 						<f:selectItems var="p" value="#{userInput.platforms}" -->
+<!-- 							itemLabel="#{p.label}" itemValue="#{p.id}" /> -->
+<!-- 					</p:selectOneMenu> -->
+
+<!-- 				</p:column> -->
+<!-- 				<p:column styleClass="col_description"> -->
+<!-- 					'Platform' allows the selection of diffrent combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2). -->
+<!-- 				</p:column> -->
+<!-- 			</p:row> -->
+
+<!-- 			<p:row> -->
+<!-- 				<p:column colspan="2"> -->
+
+<!-- 				</p:column> -->
+<!-- 			</p:row> -->
+
+
+			<!-- === TABULATOR ============================================== -->
+			<p:row>
+				<p:column colspan="2">
+
+					<p:tabView id="uploadsTab">
+						<p:tab title="File Upload" id="probesetsTab">
+
+							<p:panelGrid style="margin-bottom:20px">
+
+								<p:row>
+									<p:column>
+										<h:outputLabel for="platformItem" value="Platform:" />
+										<br />
+										<p:selectOneMenu id="platformItem"
+											value="#{userInput.selectedPlatform}">
+											<f:selectItems var="p" value="#{userInput.platforms}"
+												itemLabel="#{p.label}" itemValue="#{p.id}" />
+										</p:selectOneMenu>
+
+									</p:column>
+									<p:column styleClass="col_description">
+												'Platform' allows the selection of diffrent combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2).
+									</p:column>
+								</p:row>
+
+							</p:panelGrid>
+
+							<p:messages id="fileUploadMsg" autoUpdate="true" closable="true" />
+
+							<h:outputText
+								value="Upload lists with probe set IDs of the selected platform:" />
+							<ul>
+								<li>Press 'Choose' to select a file.</li>
+								<li>Press 'Upload' to upload the files.</li>
+							</ul>
+
+							<p:fileUpload id="fileIdPhoto"
+								update="uploadedFilesPanel growl fileUploadMsg submitFilesButton"
+								sequential="true"
+								fileUploadListener="#{inputController.handleFileUpload}"
+								mode="advanced" dragDropSupport="false" multiple="true"
+								fileLimit="10" />
+
+							<!-- === FILE UPLAOD ============================================== -->
+							<p:panel id="uploadedFilesPanel">
+
+								<ul style="list-style-type: none">
+									<li>After uploading the file(s) press 'Submit files' to
+										start the analysis.</li>
+								</ul>
+
+								<p:dataTable
+									rendered="#{not empty fileUploader.uploadedGeneLists}"
+									id="uploadedFilesList"
+									value="#{fileUploadView.uploadedFileNames}" var="file"
+									type="ordered" tableStyle="table-layout: auto;">
+									<f:facet name="header">Uploaded files</f:facet>
+									<p:column>
+										<h:outputText value="#{file}" />
+									</p:column>
+									<p:column style="width:10px;">
+										<p:commandLink update="uploadedFilesList"
+											actionListener="#{fileUploadView.deleteFileByName(file)}"
+											title="Delete file" styleClass="ui-icon ui-icon-close"
+											style="float:left;margin-right:10px">
+										</p:commandLink>
+									</p:column>
+								</p:dataTable>
+
+								<p:commandButton value="Submit files" id="submitFilesButton"
+									action="#{inputController.submitUpload}"
+									update="uploadedFilesPanel"
+									disabled="#{empty fileUploader.uploadedGeneLists}" />
+
+							</p:panel>
+
+						</p:tab>
+
+						<!-- === Genome Coordinates Tab ========================================= -->
+						<p:tab title="Genome Coordinates" id="coordinatesTab">
+
+							<p:panelGrid style="margin-bottom:20px">
+
+								<p:row>
+									<p:column>
+										<h:outputLabel for="genomeItem" value="Genome:" />
+										<br />
+										<p:selectOneMenu id="genomeItem"
+											value="#{userInput.selectedGenome}">
+											<f:selectItems var="p" value="#{userInput.genomes}"
+												itemLabel="#{p.label}" itemValue="#{p.id}" />
+										</p:selectOneMenu>
+
+									</p:column>
+									<p:column styleClass="col_description">
+												'Genome' allows the selection of diffrent combinations of genome versions (HG18, HG19)
+									</p:column>
+								</p:row>
+
+							</p:panelGrid>
+
+
+							<h:outputText value="upload genome coordinated." />
+							<h:outputText
+								value="Upload genome coordinates of the selected platform:" />
+							<ul>
+								<li>Each line must be one genome position.</li>
+								<li>Format: chromosome[TAB]start[TAB]end[TAB]strand.</li>
+								<li>chromosome: chr1, chr2, ..., chrY.</li>
+								<li>strand: 1 or -1.</li>
+							</ul>
+							<ul>
+								<li>Press 'Choose' to select a file.</li>
+								<li>Press 'Upload' to upload the files.</li>
+							</ul>
+
+
+							<p:fileUpload id="coordinatesUpload"
+								update="uploadedCoodinatedTablePanel growl fileUploadMsg submitPosButton"
+								sequential="true"
+								fileUploadListener="#{inputController.handleCoordinatesFileUpload}"
+								mode="advanced" dragDropSupport="false" multiple="true"
+								fileLimit="10" />
+
+							<p:panel id="uploadedCoodinatedTablePanel">
+
+								<p:tabView value="#{genomePosTabsView.genomePosTabs}"
+									var="genomeTab" activeIndex="#{genomePosTabsView.tabIndex}">
+
+									<p:ajax event="tabClose"
+										listener="#{genomePosTabsView.onTabClose}" />
+									<p:tab title="#{genomeTab.filename}" closable="true">
+										<h:outputText value="#{genomeTab.filename}" />
+
+										<p:dataTable var="pos" value="#{genomeTab.genomePos}">
+											<p:column headerText="Chromosome">
+												<h:outputText value="#{pos.chromosome}" />
+											</p:column>
+
+											<p:column headerText="Start">
+												<h:outputText value="#{pos.start}" />
+											</p:column>
+
+											<p:column headerText="End">
+												<h:outputText value="#{pos.end}" />
+											</p:column>
+
+											<p:column headerText="Strand">
+												<h:outputText value="#{pos.strand}" />
+											</p:column>
+										</p:dataTable>
+
+									</p:tab>
+								</p:tabView>
+
+								<p:commandButton value="Submit positions" id="submitPosButton"
+									action="#{inputController.submitUpload}"
+									update="uploadedCoodinatedTablePanel"
+									disabled="#{empty genomePosTabsView.genomePosTabs}" />
+
+							</p:panel>
+
+						</p:tab>
+					</p:tabView>
+
+				</p:column>
+			</p:row>
+
+
+
+			<!-- === FILE UPLAOD ============================================== -->
+			<!-- 			<p:row> -->
+			<!-- 				<p:column colspan="2"> -->
+
+			<!-- 					<p:messages id="fileUploadMsg" autoUpdate="true" closable="true" /> -->
+
+			<!-- 					<h:outputText -->
+			<!-- 						value="Upload lists with probe set IDs of the selected platform:" /> -->
+			<!-- 					<ul> -->
+			<!-- 						<li>Press 'Choose' to select a file.</li> -->
+			<!-- 						<li>Press 'Upload' to upload the files.</li> -->
+			<!-- 					</ul> -->
+			<!-- 					<p:fileUpload id="fileIdPhoto" -->
+			<!-- 						update="uploadedFilesPanel growl fileUploadMsg submitFilesButton" -->
+			<!-- 						sequential="true" -->
+			<!-- 						fileUploadListener="#{inputController.handleFileUpload}" -->
+			<!-- 						mode="advanced" dragDropSupport="false" multiple="true" -->
+			<!-- 						fileLimit="10" /> -->
+
+			<!-- 				</p:column> -->
+			<!-- 			</p:row> -->
+
+			<!-- === SUBMIT BUTTON ============================================ -->
+			<p:row>
+				<p:column colspan="2">
+
+					<!-- 					<p:panel id="uploadedFilesPanel"> -->
+
+					<!-- 						<ul style="list-style-type: none"> -->
+					<!-- 							<li>After uploading the file(s) press 'Submit files' to -->
+					<!-- 								start the analysis.</li> -->
+					<!-- 						</ul> -->
+
+					<!-- 						<p:dataTable -->
+					<!-- 							rendered="#{not empty fileUploader.uploadedGeneLists}" -->
+					<!-- 							id="uploadedFilesList" -->
+					<!-- 							value="#{fileUploadView.uploadedFileNames}" var="file" -->
+					<!-- 							type="ordered" tableStyle="table-layout: auto;"> -->
+					<!-- 							<f:facet name="header">Uploaded files</f:facet> -->
+					<!-- 							<p:column> -->
+					<!-- 								<h:outputText value="#{file}" /> -->
+					<!-- 							</p:column> -->
+					<!-- 							<p:column style="width:10px;"> -->
+					<!-- 								<p:commandLink update="uploadedFilesList" -->
+					<!-- 									actionListener="#{fileUploadView.deleteFileByName(file)}" -->
+					<!-- 									title="Delete file" styleClass="ui-icon ui-icon-close" -->
+					<!-- 									style="float:left;margin-right:10px"> -->
+					<!-- 								</p:commandLink> -->
+					<!-- 							</p:column> -->
+					<!-- 						</p:dataTable> -->
+
+					<!-- 						<p:commandButton value="Submit files" id="submitFilesButton" -->
+					<!-- 							action="#{inputController.submitUpload}" -->
+					<!-- 							update="uploadedFilesPanel" -->
+					<!-- 							disabled="#{empty fileUploader.uploadedGeneLists}" /> -->
+
+					<!-- 					</p:panel> -->
+				</p:column>
+
+				<p:ajaxStatus onstart="PF('statusDialog').show()"
+					onsuccess="PF('statusDialog').hide()" />
+
+				<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+					closable="false" resizable="false" showHeader="false">
+					<p:graphicImage value="/resources/images/ajaxloadingbar.gif" />
+				</p:dialog>
+
+
+
+
+			</p:row>
+
+		</p:panelGrid>
+
+	</h:form>
+
+
+</h:body>
+</html>

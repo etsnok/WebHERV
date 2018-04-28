@@ -1,0 +1,41 @@
+.red{
+	color:red;	
+}
+
+body {
+     background-color: lightblue;
+     max-width: 800px;
+     margin: auto;
+}
+
+h1 {
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:33px;
+	font-weight:bold;
+	margin:10;
+	padding:10;
+	text-align:center;
+}
+
+.ui-datatable table{
+	border-collapse:collapse;width:100%;
+}
+
+.settingsPanel {
+	
+}
+
+.col_description {
+	 font-size: 75%;
+}
+
+.ui-spacer {
+}
+
+#explainPara {
+	
+}
+
+#expl_link {
+	font-size: small;
+}
