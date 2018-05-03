@@ -7,7 +7,10 @@ The following subsections describe how to set up the WebHERV frontend as well as
 
 #### 1. Determine HERV like sequences
 
-To determine the HERV like sequences in the human genome, we used the standalone version of BLAST (Basic Local Alignment Search Tool). The latest version of BLAST can be downloaded from ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/.
+To determine the HERV like sequences in the human genome, we used the standalone version of BLAST (Basic Local Alignment Search Tool). 
+
+The latest version of BLAST can be downloaded from [here](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).
+
 The current human genome can be downloaded from ftp://ftp.ncbi.nih.gov/genomes/H_sapiens/.
 
 The program `blastn` with the output option `-outfmt 6` was used to search for more HERVs like sequences in the human genome using known HERV sequences.
