@@ -17,7 +17,6 @@ The program `blastn` with the output option `-outfmt 6` was used to search for m
 ```
   ./blastn -query hervSequences.fa -db ./human_genome_dir -out blast_output.out -outfmt 6 -evalue 1e-10
 ```
-test
 
 #### 2. Fill DRUMS database
 

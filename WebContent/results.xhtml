@@ -39,23 +39,26 @@
 			<p:tab title="File - #{tab.id}">
 
 				<h:panelGrid columns="2" cellpadding="0">
-					<h:outputLabel for="totUploadedProbs" value="Total uploaded:" />
+					<h:outputLabel for="totUploadedProbs" value="Total elements analyzed:" />
 					<h:outputText id="totUploadedProbs" value="#{tab.totalNumGenes}" />
-					<h:outputLabel for="uploadedProbs" value="Uploaded:" />
+					<h:outputLabel for="uploadedProbs" value="Elements with coordinates:" />
 					<h:outputText id="uploadedProbs" value="#{tab.knownNumGenes}" />
 					<h:outputLabel for="withResultsProbs" value="With results:" />
 					<ui:repeat value="#{tab.resultsNumGenes}" var="pair">
-    					#{pair.left}:#{pair.right}
+    					Distance #{pair.left}:#{pair.right}
 					</ui:repeat>
 				</h:panelGrid>
 
 				<h:panelGrid columns="2" cellpadding="0">
-					<h:outputText value="Hide unknown probe sets: " />
+					<h:outputText value="Hide inoperable elements: " />
 					<p:selectBooleanCheckbox value="#{tab.hideUnknownGenes}">
 						<p:ajax update=":resultsForm:resultsTabView:basicDT"
 							listener="#{tab.updateFilteredGenes}" />
 					</p:selectBooleanCheckbox>
-					<h:outputText value="Hide probe sets without hits: " />
+					
+					<h:outputText value="Hide probe sets without hits: " rendered="#{not userInput.selectedByGenome}" />
+					<h:outputText value="Hide elements without hits: " rendered="#{userInput.selectedByGenome}" />
+					
 					<p:selectBooleanCheckbox value="#{tab.hideGenesWoResults}">
 						<p:ajax update=":resultsForm:resultsTabView:basicDT"
 							listener="#{tab.updateFilteredGenes}" />

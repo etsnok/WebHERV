@@ -2,24 +2,30 @@ package org.kkruse.webherv.upload;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.security.auth.login.FailedLoginException;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang3.StringUtils;
 import org.kkruse.webherv.drums.HervService.GeneEntryTables;
 import org.kkruse.webherv.drums.HervService.HervInputSettings;
 import org.kkruse.webherv.frontpage.util.MessagesUtils;
@@ -37,7 +43,10 @@ import org.primefaces.model.UploadedFile;
 @SessionScoped
 public class FileUploader {
 
+	private static final Pattern STRAND_RGX = Pattern.compile( "(-|\\+|1|-1|\\+1)" );
+
 	private static final String CSV_DELIMITER_RGX = "\t|,|;";
+//	private static final Pattern CHROMOSOME_RGX = Pattern.compile( "[cC][hH][rR][ -_]?(1[0-9]?|2[0-2]?|[xX]|[yY])" );
 
 	private GeneDBConnector geneDBConnector;
 	private boolean isDbConnectionOpen;
@@ -86,7 +95,9 @@ public class FileUploader {
 	 */
 	public void addToGeneList( String fileName,  UploadedFile file ){
 
-		if( uploadedGeneLists.containsKey( fileName ) ){
+		if( uploadedGeneLists == null ){
+			uploadedGeneLists = new HashMap<>();
+		} else if( uploadedGeneLists.containsKey( fileName ) ){
 			// file with same name exists already
 			MessagesUtils.showWarnMsg( null,  "A file with name:'"+fileName+"' was already uploaded." );
 			return;
@@ -112,20 +123,43 @@ public class FileUploader {
 
 	public List<String[]> readUploadedGeneList( UploadedFile _file ){
 
+		List<String[]> geneTable = null;
+		try{
+			geneTable = readUploadedGeneList( _file.getInputstream() );
+		} catch (IOException e) {
+			String fileName =  _file!=null?_file.getFileName():null;
+			LOG.log(Level.WARNING,  "Failed to read file:" + fileName, e);
+		}
+		
+		return geneTable;
+//		List<String[]> geneTable = new LinkedList<String[]>();
+//		try (BufferedReader br = new BufferedReader( new InputStreamReader( _file.getInputstream(), "UTF-8" ) );){
+//			String line;
+//			while( ( line = br.readLine() ) != null ){
+//				geneTable.add( line.split( CSV_DELIMITER_RGX ) );
+//			}
+//
+//		} catch (IOException e) {
+//			String fileName =  _file!=null?_file.getFileName():null;
+//			LOG.log(Level.WARNING,  "Failed to read file:" + fileName, e);
+//		}
+//		return geneTable;
+	}
+
+	public List<String[]> readUploadedGeneList( InputStream  _is ){
+
 		List<String[]> geneTable = new LinkedList<String[]>();
-		try (BufferedReader br = new BufferedReader( new InputStreamReader( _file.getInputstream(), "UTF-8" ) );){
+		try (BufferedReader br = new BufferedReader( new InputStreamReader( _is, "UTF-8" ) );){
 			String line;
 			while( ( line = br.readLine() ) != null ){
 				geneTable.add( line.split( CSV_DELIMITER_RGX ) );
 			}
 
 		} catch (IOException e) {
-			String fileName =  _file!=null?_file.getFileName():null;
-			LOG.log(Level.WARNING,  "Failed to read file:" + fileName, e);
+			LOG.log(Level.WARNING,  "Failed to read inputstream:", e);
 		}
 		return geneTable;
 	}
-
 	
 	
 	public GeneEntryTables loadGenesLists( HervInputSettings hervInputSettings ) throws SQLException, Exception{
@@ -179,44 +213,82 @@ public class FileUploader {
 	}
 
 	
-	public GeneEntryTables convertGenesLists( HervInputSettings hervInputSettings ) throws SQLException, Exception{
+	public void convertGenesLists( GeneEntryTables tables, HervInputSettings hervInputSettings ) throws SQLException, Exception{
 
 		if( uploadedGeneLists == null || uploadedGeneLists.size() == 0 ){
 			LOG.warning( "No gene lists to load!" );
 			MessagesUtils.showWarnMsg( "fileUploadMsg" , "No files to upload!");
 		}
 
-		String geneTableName = hervInputSettings.selectedPlatform;
-		GeneEntryTables tables = new GeneEntryTables( geneTableName );
+//		String geneTableName = hervInputSettings.selectedPlatform;
 		
-		Exception ex = null;
+		FacesContext context = FacesContext.getCurrentInstance();
 		
 		for( String geneListName : uploadedGeneLists.keySet() ){
 			
 			List<String[]> geneList = uploadedGeneLists.get( geneListName );
 			List<GeneEntry> genes = new ArrayList<>();
 			
+			List<String[]> failedGeneList = new ArrayList<>();
+			
+			int countFailed = 0; // number all failed line
+			int lineIdx = 1;
 			for( String[] gene : geneList ){
-				GeneEntry entry = new GeneEntry();
-				entry.setChromosome(gene[0]);
-				try{
-					entry.setStart(Integer.parseInt(gene[1]));
-					entry.setEnd(Integer.parseInt(gene[2]));
-					entry.setStrand(gene[3]);
-					genes.add(entry);
-				} catch ( Exception e){
-					ex = e;
+				if( gene != null && gene.length >= 4 && !gene[0].isEmpty() ){
+					GeneEntry entry = new GeneEntry();
+					entry.setChromosome(gene[0]);
+					try{
+						int st = Integer.parseInt(gene[1]);
+						if( st >= 0 ){
+							entry.setStart( st );
+						} else{ throw new NumberFormatException("Start must be >= 0 :"+ st); } 
+						int en = Integer.parseInt(gene[2]);
+						if( en >= 0 ){
+							entry.setEnd(en);
+						} else{ throw new NumberFormatException("End must be >= 0 :"+ st); }
+
+						if( STRAND_RGX.matcher( gene[3] ).matches() ){
+							entry.setStrand(gene[3]);
+						} else { throw new InputMismatchException( "Starnd must be one of (+,-,1,+1,-1) not:"+ gene[3] ); }
+						genes.add(entry);
+					} catch ( Exception e){
+						failedGeneList.add(gene);
+						countFailed++;
+					}
+				} else {
+					countFailed++;
+					if( LOG.isLoggable( Level.FINE ) ){
+						LOG.fine("Unable to parse uploaded gene entry line#:"+lineIdx+" file:'"+geneListName+"' '"+ StringUtils.join(gene, " ") + "'.");
+					}
+//				    context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, geneListName,  "Error reading line:"+lineIdx ) );
 				}
+				lineIdx++;
 			}
 			tables.addGeneEntryTables(geneListName, genes);
+			
+		    
+		    if( failedGeneList != null && failedGeneList.size() > 0 ){
+
+		    	String failsMsgStr = "";
+		    	for( String[] fg : failedGeneList ){
+		    		failsMsgStr += StringUtils.join(fg, " ")+"\n";
+		    	}
+		    	
+		    	context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, geneListName,  "Read :"+(lineIdx-countFailed)+" lines skipped:"+countFailed + "\n" +failsMsgStr ) );
+		    	
+		    }
+		    
 		}
 		
-		if( ex != null ){
-			LOG.warning( "Exception parsing genome coordinates:" + ex.getLocalizedMessage() );
-			MessagesUtils.showWarnMsg( "fileUploadMsg" , "Exception parsing genome coordinates!");
-		}
+		uploadedGeneLists.clear();
 		
-		return tables;
+		
+//		if( ex != null ){
+//			LOG.warning( "Exception parsing genome coordinates:" + ex.getLocalizedMessage() );
+//			MessagesUtils.showWarnMsg( "fileUploadMsg" , "Exception parsing genome coordinates!");
+//		}
+		
+//		return tables;
 	}	
 	
 	

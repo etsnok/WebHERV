@@ -25,7 +25,13 @@ public class GenomePosTabsView {
 
 	@PostConstruct
 	public void init(){
+		loadData();
+	}
+
+	
+	private void loadData(){
 		GeneEntryTables tables = inputController.getTables();
+		
 		if( tables != null ){
 			genomePosTabs = new ArrayList<>();
 
@@ -41,26 +47,14 @@ public class GenomePosTabsView {
 	}
 
 
-
 	public List<GenomePosTab> getGenomePosTabs() {
+		loadData();
 		return genomePosTabs;
 	}
 
-	public void delteGenomePosTab( ){
-		System.out.println("Delete a tab ..." + tabIndex);
-	}
-
 	public void onTabClose(TabCloseEvent event) {
-		System.out.println("Delete a tab ..." + event.getTab().getTitle());
-		
 		inputController.deleteTableByName(event.getTab().getTitle());
 	}
-
-	//	public void delteGenomePosTab( GenomePosTab _tabToDelete ){
-	//		if( _tabToDelete != null && genomePosTabs != null ){
-	//			genomePosTabs.remove(_tabToDelete);
-	//		}
-	//	}
 
 	public void setGenomePosTabs(List<GenomePosTab> genomePosTabs) {
 		this.genomePosTabs = genomePosTabs;

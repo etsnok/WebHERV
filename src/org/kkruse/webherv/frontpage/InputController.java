@@ -37,7 +37,11 @@ import org.kkruse.webherv.settings.WebHervSettings.DrumsTableProbs;
 import org.kkruse.webherv.upload.FileUploader;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.TabChangeEvent;
+import org.primefaces.event.TabCloseEvent;
 import org.primefaces.model.UploadedFile;
+
+
 
 import com.unister.semweb.biodrums.herv.HERV;
 import com.unister.semweb.drums.api.DRUMSException;
@@ -314,9 +318,14 @@ public class InputController {
 		fileUploader.addToGeneList( fileName, uploadedFile );	
 
 		HervInputSettings userSettings = userInput.currentHervInputSettings();
-//		GeneEntryTables tables;
+
+		if( tables == null ){
+			tables = new GeneEntryTables(userSettings.selectedGenome);
+		} 
+		
+		
 		try {
-			tables = fileUploader.convertGenesLists(userSettings);
+			fileUploader.convertGenesLists( tables, userSettings);
 //			fileUploader.getUploadedGeneLists().remove(fileName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -339,6 +348,14 @@ public class InputController {
 			fileUploader.getUploadedGeneLists().remove(name);
 		}
 	}
+	
+	public void onTabChange(TabChangeEvent event) {
+		if( tables != null && tables.getGeneEntryTables() != null && tables.getGeneEntryTables().size() > 0 ){
+			tables.getGeneEntryTables().clear();// = null;
+		}
+		fileUploader.initNewGeneLists();
+	}
+	
 	
 	// === Getter and Setter =========================================================
 	public int getUploadedFiles() {

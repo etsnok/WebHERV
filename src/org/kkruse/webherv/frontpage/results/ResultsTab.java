@@ -90,20 +90,24 @@ public class ResultsTab {
 				}
 			}
 		}
-		
+
 		List<Pair<Integer, Integer>> countsList = new ArrayList<>();
-		for( Integer k : hervCountsPerOffset.keySet() ){
-			countsList.add( new ImmutablePair<Integer, Integer>( k, hervCountsPerOffset.get(k) ) );
+		if( hervCountsPerOffset != null ){
+			for( Integer k : hervCountsPerOffset.keySet() ){
+				countsList.add( new ImmutablePair<Integer, Integer>( k, hervCountsPerOffset.get(k) ) );
+			}
 		}
-		
+
 		return countsList;
 	}
 
 	private int countGenesKnown( List<Gene> genes ){
 		int count = 0;
-		for( Gene gene : genes ){
-			if( gene.offsetHervHits != null ){
-				count++;
+		if(genes != null){
+			for( Gene gene : genes ){
+				if( gene.offsetHervHits != null ){
+					count++;
+				}
 			}
 		}
 		return count;
@@ -113,7 +117,7 @@ public class ResultsTab {
 
 		columns = new ArrayList<ColumnModel>();   
 
-		if( genes.get(0) != null ){
+		if( genes != null && genes.size() > 0 && genes.get(0) != null ){
 			List<Integer> off = genes.get(0).offsets;
 			if( off != null ){
 				for( Integer columnKey : off ) {
@@ -224,9 +228,9 @@ public class ResultsTab {
 		return resultsNumGenes;
 	}
 
-//	public void setResultsNumGenes(Integer resultsNumGenes) {
-//		this.resultsNumGenes = resultsNumGenes;
-//	}
+	//	public void setResultsNumGenes(Integer resultsNumGenes) {
+	//		this.resultsNumGenes = resultsNumGenes;
+	//	}
 
 	static public class ColumnModel implements Serializable {
 

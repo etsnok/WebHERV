@@ -28,18 +28,24 @@
 		<p id="explainPara">This program enables you to calculate the
 			association between human endogenous retroviruses (HERVs) and DNA
 			microarray-based gene expression data (the current version accepts
-			only Affymetrix Human Exon 1.0 ST arrays. The server allows uploading
-			of files with probe set IDs and the program will analyze each file
-			separately for HERV sequences located in the neighborhood of these
-			probe sets.</p>
+			only Affymetrix Human Exon 1.0 ST arrays). The server allows
+			uploading of files with probe set IDs and the program will analyze
+			each file separately for HERV sequences located in the neighborhood
+			of these probe sets.</p>
 		<p id="expl_link">For detailed information see Kruse K, Nettling
 			M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018.
 			WebHERV: A web-server for the computational investigation of gene
-			expression associated with human endogeneous retroviruses. Front
-			Immunol. submitted.</p>
+			expression associated with human endogenous retroviruses. Front
+			Microbiol. submitted.</p>
+
+		<p>
+			<p:link value="Tutorial and code at GitHub"
+				href="https://github.com/etsnok/WebHERV" target="_blank" />
+		</p>
 	</p:panel>
 
-	<h:form name="settingsForm" enctype="multipart/form-data">
+	<h:form name="settingsForm" id="settingsFormId"
+		enctype="multipart/form-data">
 
 		<p:panelGrid header="Parameter settings" styleClass="settingsPanel"
 			style="margin-top:20px">
@@ -158,7 +164,7 @@
 					</p:inputText>
 					<p:message for="maxEvalue" display="icon" />
 				</p:column>
-				<p:column styleClass="col_description">The "Maximal HERV e-value" is the expect value that is allowed for a sequnces to be considered as HERV drived.</p:column>
+				<p:column styleClass="col_description">The "Maximal HERV e-value" is the expect value that is allowed for sequences to be considered as HERV derived.</p:column>
 			</p:row>
 
 			<p:row>
@@ -167,34 +173,133 @@
 				</p:column>
 			</p:row>
 
-<!-- 			<p:row> -->
-<!-- 				<p:column> -->
-<!-- 					<h:outputLabel for="platformItem" value="Platform:" /> -->
-<!-- 					<br /> -->
-<!-- 					<p:selectOneMenu id="platformItem" -->
-<!-- 						value="#{userInput.selectedPlatform}"> -->
-<!-- 						<f:selectItems var="p" value="#{userInput.platforms}" -->
-<!-- 							itemLabel="#{p.label}" itemValue="#{p.id}" /> -->
-<!-- 					</p:selectOneMenu> -->
+			<!-- 			<p:row> -->
+			<!-- 				<p:column> -->
+			<!-- 					<h:outputLabel for="platformItem" value="Platform:" /> -->
+			<!-- 					<br /> -->
+			<!-- 					<p:selectOneMenu id="platformItem" -->
+			<!-- 						value="#{userInput.selectedPlatform}"> -->
+			<!-- 						<f:selectItems var="p" value="#{userInput.platforms}" -->
+			<!-- 							itemLabel="#{p.label}" itemValue="#{p.id}" /> -->
+			<!-- 					</p:selectOneMenu> -->
 
-<!-- 				</p:column> -->
-<!-- 				<p:column styleClass="col_description"> -->
-<!-- 					'Platform' allows the selection of diffrent combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2). -->
-<!-- 				</p:column> -->
-<!-- 			</p:row> -->
+			<!-- 				</p:column> -->
+			<!-- 				<p:column styleClass="col_description"> -->
+			<!-- 					'Platform' allows the selection of different combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2). -->
+			<!-- 				</p:column> -->
+			<!-- 			</p:row> -->
 
-<!-- 			<p:row> -->
-<!-- 				<p:column colspan="2"> -->
+			<!-- 			<p:row> -->
+			<!-- 				<p:column colspan="2"> -->
 
-<!-- 				</p:column> -->
-<!-- 			</p:row> -->
+			<!-- 				</p:column> -->
+			<!-- 			</p:row> -->
 
 
 			<!-- === TABULATOR ============================================== -->
 			<p:row>
+
 				<p:column colspan="2">
 
 					<p:tabView id="uploadsTab">
+
+						<p:ajax event="tabChange" listener="#{inputController.onTabChange}" update="@this"/>
+
+						<!-- === Genome Coordinates Tab ========================================= -->
+						<p:tab title="Genome Coordinates" id="coordinatesTab">
+
+							<p:panelGrid style="margin-bottom:20px"
+								id="selectGenomePanelGrid">
+
+								<p:row>
+									<p:column>
+										<h:outputLabel for="genomeItem" value="Genome:" />
+										<br />
+										<p:selectOneMenu id="genomeItem"
+											value="#{userInput.selectedGenome}">
+											<f:selectItems var="p" value="#{userInput.genomes}"
+												itemLabel="#{p.label}" itemValue="#{p.id}" />
+										</p:selectOneMenu>
+
+									</p:column>
+									<p:column styleClass="col_description">
+												'Genome' allows the selection of different combinations of genome versions (HG18, HG19)
+									</p:column>
+								</p:row>
+
+							</p:panelGrid>
+
+							<h:outputText
+								value="Upload genome coordinates of the selected genome version:" />
+							<ul>
+								<li>Each line must be one genome position.</li>
+								<li>Format: chromosome[TAB]start[TAB]end[TAB]strand.</li>
+								<li>chromosome: chr1, chr2, ..., chrY.</li>
+								<li>strand: 1 or -1.</li>
+							</ul>
+							<ul>
+								<li>Press 'Choose' to select a file.</li>
+								<li>Press 'Upload' to upload the files.</li>
+							</ul>
+
+
+							<p:fileUpload id="coordinatesUpload" sequential="true"
+								update="test growl"
+								fileUploadListener="#{inputController.handleCoordinatesFileUpload}"
+								mode="advanced" dragDropSupport="false" multiple="true"
+								fileLimit="10" />
+
+							<p:panel id="test">
+
+								<p:tabView value="#{genomePosTabsView.genomePosTabs}"
+									rendered="#{not empty genomePosTabsView.genomePosTabs}"
+									id="genomePosTabView" var="genomeTab"
+									activeIndex="#{genomePosTabsView.tabIndex}">
+
+									<p:ajax event="tabClose"
+										listener="#{genomePosTabsView.onTabClose}" />
+
+									<p:tab title="#{genomeTab.filename}" closable="true"
+										id="genomePosFilesTab">
+
+										<p:dataTable var="pos" value="#{genomeTab.genomePos}"
+											scrollable="true" scrollHeight="150">
+											<p:column headerText="Chromosome">
+												<h:outputText value="#{pos.chromosome}" />
+											</p:column>
+
+											<p:column headerText="Start">
+												<h:outputText value="#{pos.start}" />
+											</p:column>
+
+											<p:column headerText="End">
+												<h:outputText value="#{pos.end}" />
+											</p:column>
+
+											<p:column headerText="Strand">
+												<h:outputText value="#{pos.strand}" />
+											</p:column>
+										</p:dataTable>
+
+									</p:tab>
+								</p:tabView>
+
+								<p:commandButton value="Submit positions" id="submitPosButton"
+									action="#{inputController.submitUpload}"
+									disabled="#{empty genomePosTabsView.genomePosTabs}" />
+
+							</p:panel>
+
+							<!-- Example File Upload -->
+							<h:outputText value="Example genome coordinates file:" />
+							<br />
+							<p:link value="Example file"
+								href="/resources/example_files/test_genome_coordinates.txt"
+								target="_blank" />
+
+						</p:tab>
+
+
 						<p:tab title="File Upload" id="probesetsTab">
 
 							<p:panelGrid style="margin-bottom:20px">
@@ -211,13 +316,12 @@
 
 									</p:column>
 									<p:column styleClass="col_description">
-												'Platform' allows the selection of diffrent combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2).
+												'Platform' allows the selection of different combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2).
 									</p:column>
 								</p:row>
 
 							</p:panelGrid>
 
-							<p:messages id="fileUploadMsg" autoUpdate="true" closable="true" />
 
 							<h:outputText
 								value="Upload lists with probe set IDs of the selected platform:" />
@@ -225,6 +329,8 @@
 								<li>Press 'Choose' to select a file.</li>
 								<li>Press 'Upload' to upload the files.</li>
 							</ul>
+
+							<p:messages id="fileUploadMsg" autoUpdate="true" closable="true" />
 
 							<p:fileUpload id="fileIdPhoto"
 								update="uploadedFilesPanel growl fileUploadMsg submitFilesButton"
@@ -266,93 +372,17 @@
 
 							</p:panel>
 
-						</p:tab>
-
-						<!-- === Genome Coordinates Tab ========================================= -->
-						<p:tab title="Genome Coordinates" id="coordinatesTab">
-
-							<p:panelGrid style="margin-bottom:20px">
-
-								<p:row>
-									<p:column>
-										<h:outputLabel for="genomeItem" value="Genome:" />
-										<br />
-										<p:selectOneMenu id="genomeItem"
-											value="#{userInput.selectedGenome}">
-											<f:selectItems var="p" value="#{userInput.genomes}"
-												itemLabel="#{p.label}" itemValue="#{p.id}" />
-										</p:selectOneMenu>
-
-									</p:column>
-									<p:column styleClass="col_description">
-												'Genome' allows the selection of diffrent combinations of genome versions (HG18, HG19)
-									</p:column>
-								</p:row>
-
-							</p:panelGrid>
-
-
-							<h:outputText value="upload genome coordinated." />
-							<h:outputText
-								value="Upload genome coordinates of the selected platform:" />
-							<ul>
-								<li>Each line must be one genome position.</li>
-								<li>Format: chromosome[TAB]start[TAB]end[TAB]strand.</li>
-								<li>chromosome: chr1, chr2, ..., chrY.</li>
-								<li>strand: 1 or -1.</li>
-							</ul>
-							<ul>
-								<li>Press 'Choose' to select a file.</li>
-								<li>Press 'Upload' to upload the files.</li>
-							</ul>
-
-
-							<p:fileUpload id="coordinatesUpload"
-								update="uploadedCoodinatedTablePanel growl fileUploadMsg submitPosButton"
-								sequential="true"
-								fileUploadListener="#{inputController.handleCoordinatesFileUpload}"
-								mode="advanced" dragDropSupport="false" multiple="true"
-								fileLimit="10" />
-
-							<p:panel id="uploadedCoodinatedTablePanel">
-
-								<p:tabView value="#{genomePosTabsView.genomePosTabs}"
-									var="genomeTab" activeIndex="#{genomePosTabsView.tabIndex}">
-
-									<p:ajax event="tabClose"
-										listener="#{genomePosTabsView.onTabClose}" />
-									<p:tab title="#{genomeTab.filename}" closable="true">
-										<h:outputText value="#{genomeTab.filename}" />
-
-										<p:dataTable var="pos" value="#{genomeTab.genomePos}">
-											<p:column headerText="Chromosome">
-												<h:outputText value="#{pos.chromosome}" />
-											</p:column>
-
-											<p:column headerText="Start">
-												<h:outputText value="#{pos.start}" />
-											</p:column>
-
-											<p:column headerText="End">
-												<h:outputText value="#{pos.end}" />
-											</p:column>
-
-											<p:column headerText="Strand">
-												<h:outputText value="#{pos.strand}" />
-											</p:column>
-										</p:dataTable>
-
-									</p:tab>
-								</p:tabView>
-
-								<p:commandButton value="Submit positions" id="submitPosButton"
-									action="#{inputController.submitUpload}"
-									update="uploadedCoodinatedTablePanel"
-									disabled="#{empty genomePosTabsView.genomePosTabs}" />
-
-							</p:panel>
+							<!-- Example File Upload -->
+							<h:outputText value="Example probe set id files:" />
+							<br />
+							<p:link value="Example file 1"
+								href="/resources/example_files/HLup10x.txt" target="_blank" />
+							<br />
+							<p:link value="Example file 2"
+								href="/resources/example_files/HLdown10x.txt" target="_blank" />
 
 						</p:tab>
+
 					</p:tabView>
 
 				</p:column>
@@ -426,8 +456,6 @@
 					closable="false" resizable="false" showHeader="false">
 					<p:graphicImage value="/resources/images/ajaxloadingbar.gif" />
 				</p:dialog>
-
-
 
 
 			</p:row>
