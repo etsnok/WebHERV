@@ -34,20 +34,55 @@
 			</plugin>
 
 			<!-- The following will compile the code also as .jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>make-a-jar</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 				<artifactId>maven-jar-plugin</artifactId> -->
+<!-- 				  <configuration> -->
+<!--     <archive> -->
+<!--       <manifest> -->
+<!--         <addClasspath>true</addClasspath> -->
+<!--         <classpathPrefix>./WebContent/WEB-INF/lib</classpathPrefix> -->
+<!--         <mainClass>org.kkruse.webherv.upload.WebHERVWriter</mainClass> -->
+<!--       </manifest> -->
+<!--     </archive> -->
+<!--   </configuration> -->
+  
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>make-a-jar</id> -->
+<!-- 						<phase>compile</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>jar</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
 
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+            <configuration>
+                <archive>
+                <manifest>
+                    <mainClass>
+                        org.kkruse.webherv.upload.WebHERVWriter
+                    </mainClass>
+                </manifest>
+                </archive>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 
 		</plugins>
 	</build>

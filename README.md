@@ -18,6 +18,16 @@ The program `blastn` with the output option `-outfmt 6` was used to search for m
   ./blastn -query hervSequences.fa -db ./human_genome_dir -out blast_output.out -outfmt 6 -evalue 1e-10
 ```
 
+#### 2. Clone WebHERV project
+
+```
+ git clone https://github.com/etsnok/WebHERV.git
+ 
+ cd ./WebHERV/
+ 
+  mvn package
+``
+
 #### 2. Fill DRUMS database
 
 TODO the user must checkout DRUMS or BioDRUMS first? How can he do it? Where to store it? Must he compile it? Is there a jar?
