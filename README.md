@@ -24,14 +24,6 @@ Download the WebHERV sources via from GitHub:
 
 ```
  git clone https://github.com/etsnok/WebHERV.git
- 
- cd ./WebHERV/
- 
-  mvn package
-  
-  java -jar target/dependency/jetty-runner.jar target/*.war
-  
-  http://localhost:8080/
 ```
 
 After downloading the sources change in the WebHERV directory.
@@ -130,7 +122,7 @@ Creating the DRUMS store:
 java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 0
 ```
 
-After this you can fill the created DRUMS store with your BLAST output data (`blast_output.outblast_output.out`) by running:
+After this you can fill the created DRUMS store with your BLAST output data (`blast_output.out`) by running:
 ```
 java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 1 path/to/your/blast_output.out
 ```
@@ -139,10 +131,6 @@ java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 1 pat
 
 Currently, the WebHERV accesses a simple SQLite database holding the genomic postions 
 for the `Affymetrix Human Exon 1.0 ST arrays` hg18 and hg19 stored in the database file. 
-
-TODO provide CREATE TABLE statements, 
-TODO provide example data or real data
-TODO provide script for filling the tables
 
 ### 6. Run WebHERV Server
 
