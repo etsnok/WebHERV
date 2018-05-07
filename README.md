@@ -5,7 +5,7 @@ WebHERV (http://calypso.informatik.uni-halle.de/WebHERV/) is a web GUI that enab
 
 The following subsections describe how to set up the WebHERV frontend as well as the backend. 
 
-#### 1. Determine HERV like sequences
+### 1. Determine HERV like sequences
 
 To determine the HERV like sequences in the human genome, we used the standalone version of BLAST (Basic Local Alignment Search Tool). 
 
@@ -18,7 +18,9 @@ The program `blastn` with the output option `-outfmt 6` was used to search for m
   ./blastn -query hervSequences.fa -db ./human_genome_dir -out blast_output.out -outfmt 6 -evalue 1e-10
 ```
 
-#### 2. Clone WebHERV project
+### 2. WebHERV sources
+
+Download the WebHERV sources via from GitHub:
 
 ```
  git clone https://github.com/etsnok/WebHERV.git
@@ -26,60 +28,139 @@ The program `blastn` with the output option `-outfmt 6` was used to search for m
  cd ./WebHERV/
  
   mvn package
-``
-
-#### 2. Fill DRUMS database
-
-TODO the user must checkout DRUMS or BioDRUMS first? How can he do it? Where to store it? Must he compile it? Is there a jar?
-
-To manage the billions of BLAST hits we use the highly optimized key-value store DRUMS. DRUMS is set up and filled as follows. First, set the location for the DRUMS store in the `WebContent/WEB-INF/drums.properties` directory.
-```
-  DATABASE_DIRECTORY=/path/to/drums/db/`
+  
+  java -jar target/dependency/jetty-runner.jar target/*.war
+  
+  http://localhost:8080/
 ```
 
-Second, use the java program `org.kkruse.webherv.upload.WebHERVWriter` to write the BLAST results to the DRUMS store in consideration of your `drums.properties` file.
+After downloading the sources change in the WebHERV directory.
 ```
-  TODO is it needed to compile the java code first?
-  TODO full command
+cd ./WebHERV/
 ```
 
-Third, register the database directory in the `WebContent/WEB-INF/portal-config.properties`. The WebHERV frontend is designed to access multiple DRUMS stores located in one folder, so in `portal-config.properties` the parameter `drums.directory.path` must be set to the parent directory of your DRUMS stores. Configure the specific stores with the `drums.databases.hervs.hg19.{id,dir,genome}` parameters.
+This directory contains all the necceary files to set up and compile the WebHERV webapp.
+
+### 3. Setup DRUMS store and WebHERV
+The directory `WebContent/WEB-INF/` contains all configuration files that are need to set up your own WebHERV. 
+
+#### 3.1 DRUMS setup
+To manage the billions of BLAST hits we use the highly optimized key-value store DRUMS. 
+ 
+ 
+To set up a DRUMS DB, set the location for the DRUMS store in the 
+`WebContent/WEB-INF/drums.properties` directory.
 
 ```
-  drums.directory.path="/Users/Konstantin/Documents/HERV-PS-AssocHomepage/drumsDatabases"
+  DATABASE_DIRECTORY=/path/to/drums/db/your_db/`
+```
+
+`your_db` is the directory where the DRUMS DB will be stored (or is stored if it's already exists).
+
+**NOTE:**
+The WebHERV is designed to hold multiple DRUMS DBs.
+Therefore you can create additional DRUMS DBs next to `your_db`
+ e.g.: `/path/to/drums/db/your_db_2/`
+ 
+#### 3.2 WebHERV setup
+
+To register your DRUMS DB for the WebHERV front end you need to edit the following to configuration files:
+
+##### web.xml
+
+First, to enable accessing the file system directory containing the DRUMS
+ directories (`/path/to/drums/db/`) 
+in `WebContent/WEB-INF/web.xml` you need to set the following parameter:
+
+```
+<context-param>
+	<param-name>drumsDatabasesDir</param-name>
+	<param-value>/path/to/drums/db</param-value>
+</context-param>
+```
+
+Otherwise the WebHERV would have not the rights to read the file system.
+
+**NOTE:** the path is the parent directory of `your_db` so that other directories 
+like `your_db_2` are also accessible.
+
+
+##### drums.properties
+Second, to register your DRUMS DBs in the WebHERV front end you need to edit the 
+`WebContent/WEB-INF/drums.properties` file.
+There you need to set the `drums.directory.path` to the directory containing your DRUMS DBs.
+The individual databases need to be registered by `drums.databases.hervs.your_db`.
+
+```
+  drums.directory.path="/path/to/drums/db"
 
   # hg19 drums database
-  drums.databases.hervs.hg19.id=hervs_hg19
-  drums.databases.hervs.hg19.dir=hervs_hg19
-  drums.databases.hervs.hg19.genome=hg19
+  drums.databases.hervs.your_db.id=your_db
+  drums.databases.hervs.your_db.dir=your_db
+  drums.databases.hervs.your_db.genome=hg19
 
   # hg18 drums database
-  drums.databases.hervs.hg18.id=hervs_hg18
-  drums.databases.hervs.hg18.dir=hervs_hg18
-  drums.databases.hervs.hg18.genome=hg18
+  drums.databases.hervs.your_db_2.id=your_db_2
+  drums.databases.hervs.your_db_2.dir=your_db_2
+  drums.databases.hervs.your_db_2.genome=hg18
 ```
 
-Forth, add the path to the DRUMS directory to `WebContent/WEB-INF/web.xml`. 
+**NOTE:** the parameter `genome` must be set to either `hg18` or `hg19`.
+
+#### 3.3 WebHERV packaging
+
+After setting up the WebHERV and DRUMS configurations you can package your WebHERV
+by running:
 ```
- <context-param>
-		<param-name>drumsDatabasesDir</param-name>
-		<param-value>/path/to/drums/db</param-value>
-  </context-param>
+mvn package
 ```
 
-#### 3. Fill Probe sets
+in the `./WebHERV/` directory.
 
-Currently, the WebHERV accesses a simple SQLite database holding the genomic postions for the `Affymetrix Human Exon 1.0 ST arrays` hg18 and hg19 stored in the database file. 
+This will produce the files `WebHERV-X.X.X.war` and a `WebHERV-X.X.X.jar` in the `./target/` directory.
+
+### 4. Fill DRUMS database
+
+After packaging the WebHERV you can use the `WebHERV-X.X.X.jar` to create and fill your DRUMS DB with data. 
+
+Use the java program `org.kkruse.webherv.upload.WebHERVWriter` to create the DRUMS store in consideration of your `drums.properties` file.
+
+Creating the DRUMS store:
+```
+java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 0
+```
+
+After this you can fill the created DRUMS store with your BLAST output data (`blast_output.outblast_output.out`) by running:
+```
+java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 1 path/to/your/blast_output.out
+```
+
+### 5. Fill Probe sets
+
+Currently, the WebHERV accesses a simple SQLite database holding the genomic postions 
+for the `Affymetrix Human Exon 1.0 ST arrays` hg18 and hg19 stored in the database file. 
 
 TODO provide CREATE TABLE statements, 
 TODO provide example data or real data
 TODO provide script for filling the tables
 
-#### 4. Create .WAR and deploy
+### 6. Run WebHERV Server
 
-Finally, to be able to run the web-server you must create a `.war` file containing the frontend with all properties and deploy it in the webapps directory of your server e.g. tomcat.  
+Finally, you are able to run the web-server by deploying it to server (e.g. tomcat) or
+starting a local Jetty instance.
 
+#### 6.1 Server
+
+You can take the `.war` file containing the front end with all properties 
+and deploy it in the webapps directory of your server e.g. tomcat.  
+
+The front end will be accessible by something like: `http://your_server_url/WebHERV/`
+
+#### 6.1 Local Jetty instance
+
+Or you can start a local Jetty server instance from `WebHERV/ via:
 ```
-  TODO command to create the war file. 
+java -jar target/dependency/jetty-runner.jar target/*.war
 ```
 
+and in your browser enter the following URL: `http://localhost:8080/` 

@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -18,7 +17,6 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.kkruse.webherv.drums.DrumsConnector;
 import org.kkruse.webherv.drums.HervService;
 import org.kkruse.webherv.drums.HervService.GeneEntryTables;
@@ -27,7 +25,6 @@ import org.kkruse.webherv.drums.HervService.HervServiceException;
 import org.kkruse.webherv.frontpage.results.ResultsTab;
 import org.kkruse.webherv.frontpage.results.ResultsView;
 import org.kkruse.webherv.frontpage.results.ResultsTab.Gene;
-import org.kkruse.webherv.frontpage.results.ResultsTab.HervHit;
 import org.kkruse.webherv.frontpage.results.ResultsTab.OffsetHervHits;
 import org.kkruse.webherv.frontpage.util.MessagesUtils;
 import org.kkruse.webherv.frontpage.util.ResultsUtils;
@@ -38,7 +35,6 @@ import org.kkruse.webherv.upload.FileUploader;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.event.TabCloseEvent;
 import org.primefaces.model.UploadedFile;
 
 
@@ -178,7 +174,7 @@ public class InputController {
 			return "";
 		}
 
-		LOG.info( "SubmitingUpload" );	
+		if( LOG.isLoggable(Level.FINE) ){LOG.fine( "SubmitingUpload" );	}
 		
 		HervInputSettings userSettings = userInput.currentHervInputSettings();
 		// Load the data for the gene lists:
@@ -215,7 +211,7 @@ public class InputController {
 				int count = 0;
 				for( String fileName : tables.getGeneEntryTables().keySet() ){
 					genesFileIdHervsMap.put(fileName, hervService.selectHervsInRange( userInput.currentHervInputSettings(), fileName, tables.getGeneEntryTables() ) );
-					LOG.info("Finished uploaded file:" + fileName);
+					if( LOG.isLoggable(Level.FINE) ){LOG.fine("Finished uploaded file:" + fileName);}
 					setFinishedFiles( ++count );
 				}
 
