@@ -43,7 +43,7 @@
 					<h:outputText id="totUploadedProbs" value="#{tab.totalNumGenes}" />
 					<h:outputLabel for="uploadedProbs" value="Elements with coordinates:" />
 					<h:outputText id="uploadedProbs" value="#{tab.knownNumGenes}" />
-					<h:outputLabel for="withResultsProbs" value="With results:" />
+					<h:outputLabel value="With results:" />
 					<ui:repeat value="#{tab.resultsNumGenes}" var="pair">
     					Distance #{pair.left}:#{pair.right}
 					</ui:repeat>

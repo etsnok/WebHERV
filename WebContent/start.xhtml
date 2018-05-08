@@ -25,22 +25,25 @@
 
 	<!-- main description  -->
 	<p:panel id="explainPanel">
-		<p id="explainPara">This program enables you to calculate the
-			association between human endogenous retroviruses (HERVs) and DNA
-			microarray-based gene expression data (the current version accepts
-			only Affymetrix Human Exon 1.0 ST arrays). The server allows
-			uploading of files with probe set IDs and the program will analyze
-			each file separately for HERV sequences located in the neighborhood
-			of these probe sets.</p>
-		<p id="expl_link">For detailed information see Kruse K, Nettling
-			M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018.
-			WebHERV: A web-server for the computational investigation of gene
-			expression associated with human endogenous retroviruses. Front
-			Microbiol. submitted.</p>
+		<p id="explainPara">This program enables you to analyze the association 
+		between human endogenous retrovirus (HERV) sequences and a set of genome coordinates. 
+		For instance, these coordinates can be obtained from RNAseq or micro-array based 
+		gene expression profiling experiments. 
+		The server allows uploading of files with probe set IDs
+		 (the current version accepts only Affymetrix Human Exon 1.0 ST arrays) or
+		  files with genome coordinates.
+		 The program will analyze each file separately for HERV sequences located in the neighborhood of these probe sets or genome coordinates..</p>
+		<p id="expl_link">For detailed information see Kruse K, Nettling M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018. WebHERV: A web-server for the computational investigation of gene expression associated with human endogenous retroviruses. Front Microbiol. submitted.</p>
 
-		<p>
+		<p id="code_links">
+			<h:outputText value="A tutorial for server development and the code for this server can be found here: "/>
 			<p:link value="Tutorial and code at GitHub"
 				href="https://github.com/etsnok/WebHERV" target="_blank" />
+			<br />
+			<h:outputText value="Step-by-step user instructions can be found here: "/>
+			<p:link value="Instructions"
+				href="/resources/docs/InstructionsWebHERV.pdf" target="_blank" />
+	
 		</p>
 	</p:panel>
 
@@ -90,14 +93,16 @@
 							itemLabel="#{range.value}" itemValue="#{range.value}" />
 					</p:selectOneRadio>
 				</p:column>
-				<p:column styleClass="col_description">The 'Area' defines the region around the probe set (with regards to the orientation of the probe set) in which the program will search for HERV sequences.
+				<p:column styleClass="col_description">
+				The 'Area' defines the region around the genome coordinates or probe set 
+				coordinates in which the program will search for HERV sequences. 
 				<ul>
-						<li>Area 'overlap': the program will search for HERV
-							sequences upstream and downstream of the probe set.</li>
-						<li>Area 'downstream': the program will only look for HERV
-							sequences downstream (3') of the probe set.</li>
-						<li>Area 'upstream', the program will only look for HERV
-							sequences upstream (5') of the probe set.</li>
+						<li>Area 'overlap': the program will search for HERV sequences 
+						upstream and downstream of the probe set or genome coordinates.</li>
+						<li>Area 'downstream': the program will only search for HERV 
+						sequences downstream (3') of the probe set or genome coordinates.</li>
+						<li>Area 'upstream', the program will only search for HERV sequences 
+						upstream (5') of the probe set or genome coordinates.</li>
 					</ul>
 
 				</p:column>
@@ -120,7 +125,13 @@
 					</p:inputText>
 					<p:message for="rangeSize" display="icon" />
 				</p:column>
-				<p:column styleClass="col_description">'Distance' defines the region (in base pairs) of the DNA around the probe sets which is analyzed for presence of HERV sequences. It is possible to enter a ','-separated list of numbers to analyze multiple distances at once (e.g.: 100, 1000, 10000).</p:column>
+				<p:column styleClass="col_description">
+					'Distance' defines the region (in base pairs) of the DNA 
+					around the probe set or genome coordinates which is analyzed 
+					for presence of HERV sequences. It is possible to enter a 
+					comma-separated list of values to analyze multiple distances 
+					at once (e.g.: 100, 1000, 10000).
+				</p:column>
 			</p:row>
 
 			<p:row>
@@ -223,7 +234,9 @@
 
 									</p:column>
 									<p:column styleClass="col_description">
-												'Genome' allows the selection of different combinations of genome versions (HG18, HG19)
+										'Genome' allows the selection of different genome 
+										versions (currently available: HG18, HG19) for 
+										the coordinates of HERV-like sequences.
 									</p:column>
 								</p:row>
 
@@ -232,7 +245,7 @@
 							<h:outputText
 								value="Upload genome coordinates of the selected genome version:" />
 							<ul>
-								<li>Each line must be one genome position.</li>
+								<li>Each line must contain only one genome position.</li>
 								<li>Format: chromosome[TAB]start[TAB]end[TAB]strand.</li>
 								<li>chromosome: chr1, chr2, ..., chrY.</li>
 								<li>strand: 1 or -1.</li>
@@ -286,6 +299,7 @@
 
 								<p:commandButton value="Submit positions" id="submitPosButton"
 									action="#{inputController.submitUpload}"
+									update="coordinatesTab"
 									disabled="#{empty genomePosTabsView.genomePosTabs}" />
 
 							</p:panel>
@@ -296,11 +310,19 @@
 							<p:link value="Example file"
 								href="/resources/example_files/test_genome_coordinates.txt"
 								target="_blank" />
+							<br />
+							<p:link value="Example file B_cells_up_10x"
+								href="/resources/example_files/B_cells_up_10x_coordinates.txt"
+								target="_blank" />
+							<br />
+							<p:link value="Example file HL_up_10x"
+								href="/resources/example_files/HL_up_10x_coordinates.txt"
+								target="_blank" />
 
 						</p:tab>
 
 
-						<p:tab title="File Upload" id="probesetsTab">
+						<p:tab title="Upload probe set IDs" id="probesetsTab">
 
 							<p:panelGrid style="margin-bottom:20px">
 
@@ -367,19 +389,19 @@
 
 								<p:commandButton value="Submit files" id="submitFilesButton"
 									action="#{inputController.submitUpload}"
-									update="uploadedFilesPanel"
+									update="uploadedFilesPanel probesetsTab"
 									disabled="#{empty fileUploader.uploadedGeneLists}" />
 
 							</p:panel>
 
 							<!-- Example File Upload -->
-							<h:outputText value="Example probe set id files:" />
+							<h:outputText value="Example probe set ID files:" />
 							<br />
-							<p:link value="Example file 1"
-								href="/resources/example_files/HLup10x.txt" target="_blank" />
+							<p:link value="Example file HL_up_10x_ps"
+								href="/resources/example_files/HL_up_10x_ps.txt" target="_blank" />
 							<br />
 							<p:link value="Example file 2"
-								href="/resources/example_files/HLdown10x.txt" target="_blank" />
+								href="/resources/example_files/B_cells_up_10x_ps.txt" target="_blank" />
 
 						</p:tab>
 

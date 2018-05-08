@@ -236,7 +236,8 @@ public class InputController {
 
 		// reset the gene list after submitting
 		fileUploader.initNewGeneLists();
-
+		tables = null;
+		
 		return "results?faces-redirect=true"; // navigate to results page
 	}
 
