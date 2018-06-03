@@ -198,6 +198,10 @@ public class DrumsHervService implements HervService {
 		try{
 			reader = tryToGetDrumsReader();
 
+			if( reader == null ){
+				return probesetHervsMap;
+			}
+			
 			// get the list of genes/probesets
 			List<GeneEntry> geneEntries = geneEntryTable.get( geneFile );
 			int count = 0;
@@ -226,14 +230,16 @@ public class DrumsHervService implements HervService {
 
 				try {
 					Map<Integer, List<HERV>> filteredRange = null;
-					if( rangeDef != null ){
+					if( rangeDef != null && rangeDef.lowerKey != null && rangeDef.upperKey != null ){
 						// read the hervs inside the range:
 						List<HERV> range = readHERVsInRange( reader, rangeDef.lowerKey, rangeDef.upperKey );
 
 						// filter data
 						filteredRange = filterRange( inputSettings.selectedRange, rangeDef.geneEntry, range, inputSettings.minimalLength, inputSettings.maxEvalue, inputSettings.offset );
+						probesetHervsMap.put( geneEntry, filteredRange );
+					} else {
+						LOG.warning("HERVRangeDefinition is noz proper set:" + rangeDef );
 					}
-					probesetHervsMap.put( geneEntry, filteredRange );
 
 				} catch ( IOException e ) {
 					LOG.log( Level.WARNING, "Failed to read HERVs in range", e );
@@ -273,6 +279,10 @@ public class DrumsHervService implements HervService {
 			} 
 
 			count_trials++;
+		}
+		
+		if( reader == null ){
+			LOG.severe( "Couldn't get a DRUMS reder!" );
 		}
 
 		return reader;
@@ -372,6 +382,12 @@ public class DrumsHervService implements HervService {
 		public GeneEntry geneEntry;
 		public HERV lowerKey;
 		public HERV upperKey;
+		
+		@Override
+		public String toString() {
+			return "HERVRangeDefinition [geneEntry=" + geneEntry + ", lowerKey=" + lowerKey + ", upperKey=" + upperKey
+					+ "]";
+		}
 	}
 
 	// ------------------------------------------------------------------------

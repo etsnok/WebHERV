@@ -1,9 +1,9 @@
 # WebHERV
 WebHERV front-end with the key-value store DRUMS.
 
-WebHERV (http://calypso.informatik.uni-halle.de/WebHERV/) is a web GUI that enables the user to access HERV (Human endogenous retrovirus) genome positions stored in the underlying highly optimized key-value store DRUMS (https://github.com/mgledi/DRUMS).
+WebHERV (http://calypso.informatik.uni-halle.de/WebHERV/) is a web GUI that enables the user to access HERV (Human endogenous retrovirus) or any other genome positions stored in the underlying highly optimized key-value store DRUMS (https://github.com/mgledi/DRUMS).
 
-The following subsections describe how to set up the WebHERV frontend as well as the backend. 
+The following subsections describe how to set up the WebHERV frontend as well as the backend with HERVs but it can by customized to any other type of genomic positions.
 
 ### 1. Determine HERV like sequences
 
@@ -17,6 +17,11 @@ The program `blastn` with the output option `-outfmt 6` was used to search for m
 ```
   ./blastn -query hervSequences.fa -db ./human_genome_dir -out blast_output.out -outfmt 6 -evalue 1e-10
 ```
+
+#### 1.1 Other genomic positions
+
+Similar to the HERV like sequences any other type of sequences or refernece genomes ca be used
+to determine genomic positional information.  
 
 ### 2. WebHERV sources
 
@@ -38,7 +43,6 @@ The directory `WebContent/WEB-INF/` contains all configuration files that are ne
 
 #### 3.1 DRUMS setup
 To manage the billions of BLAST hits we use the highly optimized key-value store DRUMS. 
- 
  
 To set up a DRUMS DB, set the location for the DRUMS store in the 
 `WebContent/WEB-INF/drums.properties` directory.
@@ -82,6 +86,7 @@ Second, to register your DRUMS DBs in the WebHERV front end you need to edit the
 `WebContent/WEB-INF/drums.properties` file.
 There you need to set the `drums.directory.path` to the directory containing your DRUMS DBs.
 The individual databases need to be registered by `drums.databases.hervs.your_db`.
+
 
 ```
   drums.directory.path="/path/to/drums/db"
