@@ -1,48 +1,48 @@
 # WebHERV
 WebHERV front-end with the key-value store DRUMS.
 
-WebHERV (http://calypso.informatik.uni-halle.de/WebHERV/) is a web GUI that enables the user to access HERV (Human endogenous retrovirus) or any other genome positions stored in the underlying highly optimized key-value store DRUMS (https://github.com/mgledi/DRUMS).
+WebHERV (http://calypso.informatik.uni-halle.de/WebHERV/) is a web GUI that enables the user to access HERV (Human endogenous retrovirus)-like elements or any other genome positions stored in the underlying highly optimized key-value store DRUMS (https://github.com/mgledi/DRUMS).
 
-The following subsections describe how to set up the WebHERV frontend as well as the backend with HERVs but it can by customized to any other type of genomic positions.
+The following subsections describe how to set up the WebHERV front-end as well as the back-end with HERVs but it can be customized to any other type of genomic positions.
 
-### 1. Determine HERV like sequences
+### 1. Determine HERV-like sequences
 
-To determine the HERV like sequences in the human genome, we used the standalone version of BLAST (Basic Local Alignment Search Tool). 
+To determine the HERV-like sequences in the human genome, we used the standalone version of BLAST (Basic Local Alignment Search Tool). 
 
 The latest version of BLAST can be downloaded from ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/.
 
 The current human genome can be downloaded from ftp://ftp.ncbi.nih.gov/genomes/H_sapiens/.
 
-The program `blastn` with the output option `-outfmt 6` was used to search for more HERVs like sequences in the human genome using known HERV sequences.
+The program `blastn` with the output option `-outfmt 6` was used to search for more HERV-like sequences in the human genome using known HERV sequences. For the first version of WebHERV we used HERV coordinates from a published data base (Villesen et al. (2004) Retrovirology 11,1-32).
 ```
   ./blastn -query hervSequences.fa -db ./human_genome_dir -out blast_output.out -outfmt 6 -evalue 1e-10
 ```
 
 #### 1.1 Other genomic positions
 
-Similar to the HERV like sequences any other type of sequences or refernece genomes ca be used
+Similar to the HERV-like sequences any other type of sequences or reference genomes can be used
 to determine genomic positional information.  
 
 ### 2. WebHERV sources
 
-Download the WebHERV sources via from GitHub:
+Download the WebHERV source from GitHub:
 
 ```
  git clone https://github.com/etsnok/WebHERV.git
 ```
 
-After downloading the sources change in the WebHERV directory.
+After downloading, change to the WebHERV directory.
 ```
 cd ./WebHERV/
 ```
 
-This directory contains all the necceary files to set up and compile the WebHERV webapp.
+This directory contains all the neccessary files to set up and compile the WebHERV webapp.
 
 ### 3. Setup DRUMS store and WebHERV
-The directory `WebContent/WEB-INF/` contains all configuration files that are need to set up your own WebHERV. 
+The directory `WebContent/WEB-INF/` contains all configuration files that are needed to set up your own WebHERV. 
 
 #### 3.1 DRUMS setup
-To manage the billions of BLAST hits we use the highly optimized key-value store DRUMS. 
+To manage the high number of BLAST hits we use the highly optimized key-value store DRUMS. 
  
 To set up a DRUMS DB, set the location for the DRUMS store in the 
 `WebContent/WEB-INF/drums.properties` directory.
@@ -51,7 +51,7 @@ To set up a DRUMS DB, set the location for the DRUMS store in the
   DATABASE_DIRECTORY=/path/to/drums/db/your_db/`
 ```
 
-`your_db` is the directory where the DRUMS DB will be stored (or is stored if it's already exists).
+`your_db` is the directory where the DRUMS DB will be stored (or is stored if it already exists).
 
 **NOTE:**
 The WebHERV is designed to hold multiple DRUMS DBs.
@@ -60,7 +60,7 @@ Therefore you can create additional DRUMS DBs next to `your_db`
  
 #### 3.2 WebHERV setup
 
-To register your DRUMS DB for the WebHERV front end you need to edit the following to configuration files:
+To register your DRUMS DB for the WebHERV front-end you need to edit the following two configuration files:
 
 ##### web.xml
 
@@ -132,12 +132,12 @@ After this you can fill the created DRUMS store with your BLAST output data (`bl
 java -jar ./target/WebHERV-0.0.1.jar ./WebContent/WEB-INF/drums.properties 1 path/to/your/blast_output.out
 ```
 
-### 5. Fill Probe sets
+### 5. Fill probe sets
 
-Currently, the WebHERV accesses a simple SQLite database holding the genomic postions 
+Currently, the WebHERV accesses a simple SQLite database holding the genomic positions 
 for the `Affymetrix Human Exon 1.0 ST arrays` hg18 and hg19 stored in the database file. 
 
-### 6. Run WebHERV Server
+### 6. Run WebHERV server
 
 Finally, you are able to run the web-server by deploying it to server (e.g. tomcat) or
 starting a local Jetty instance.
@@ -147,11 +147,11 @@ starting a local Jetty instance.
 You can take the `.war` file containing the front end with all properties 
 and deploy it in the webapps directory of your server e.g. tomcat.  
 
-The front end will be accessible by something like: `http://your_server_url/WebHERV/`
+The front-end will be accessible by something like: `http://your_server_url/WebHERV/`
 
 #### 6.1 Local Jetty instance
 
-Or you can start a local Jetty server instance from `WebHERV/ via:
+Or you can start a local Jetty server instance from WebHERV via:
 ```
 java -jar target/dependency/jetty-runner.jar target/*.war
 ```
