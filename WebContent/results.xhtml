@@ -24,7 +24,7 @@
 			<h:outputLabel for="platform" value="Platform:" rendered="#{not userInput.selectedByGenome}"/>
 			<h:outputText id="platform" value="#{userInput.selectedPlatform}"  rendered="#{not userInput.selectedByGenome}"/>
 			<h:outputLabel for="genome" value="Genome:" rendered="#{userInput.selectedByGenome}"/>
-			<h:outputText id="genome" value="#{userInput.selectedGenome}"  rendered="#{userInput.selectedByGenome}"/>
+			<h:outputText id="genome" value="#{userInput.selectedDrums}"  rendered="#{userInput.selectedByGenome}"/>
 			
 			<h:outputLabel for="eValue" value="E-value:" />
 			<h:outputText id="eValue" value="1.0E-#{userInput.maxEvalueExp}" />

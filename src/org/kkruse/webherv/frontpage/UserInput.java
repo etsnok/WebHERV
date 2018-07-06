@@ -20,7 +20,7 @@ public class UserInput {
 
 	private static final Logger LOG = Logger.getLogger( UserInput.class.getName() );
 
-	private InputService inputService;
+//	private InputService inputService;
 
 	@ManagedProperty( value="#{webHervSettings}" )
 	private WebHervSettings webHervSettings;
@@ -31,7 +31,7 @@ public class UserInput {
 	private String  offsetListSep;
 	private String  selectedRange;
 	private String  selectedPlatform;
-	private String  selectedGenome;
+	private String  selectedDrums;
 	private boolean  selectedByGenome;
 	private String  selectedVariant;
 	private Integer minimalLength;
@@ -44,11 +44,12 @@ public class UserInput {
 	@PostConstruct
 	public void init(){
 
-		inputService     = new InputService();
-		selectedRange    = inputService.getDefaultRange();
-		selectedPlatform = inputService.getDefaultPlatform();
-		selectedGenome   = inputService.getPlatformGenomes().get(selectedPlatform);
-		selectedVariant  = inputService.getDefaultVariant();
+		//inputService     = new InputServiceImpl();
+//		inputService     = new PropertiesInputService();
+		selectedRange    = webHervSettings.getDefaultRange();
+		selectedPlatform = webHervSettings.getDefaultPlatform();
+		selectedDrums    = webHervSettings.getPlatformDrums().get(selectedPlatform);
+		selectedVariant  = webHervSettings.getDefaultVariant();
 
 		offset          = webHervSettings.getOffsetListDefault();
 		offsetListRegex = webHervSettings.getOffsetListRegex();
@@ -76,7 +77,7 @@ public class UserInput {
 				toOffsetList( getOffset() ),
 				getSelectedRange(),
 				getSelectedPlatform(),
-				getSelectedGenome(),
+				getSelectedDrums(),
 				getSelectedVariant(), 
 				getMinimalLength(),
 				toMaxEvalue( getMaxEvalueExp() ) );
@@ -105,19 +106,19 @@ public class UserInput {
 
 	// Lists Getter -----------------------------------------------------------
 	public List<SelectItem> getRanges(){
-		return inputService.getRanges();
+		return webHervSettings.getRanges();
 	}
 
 	public List<SelectItem> getPlatforms(){
-		return inputService.getPlatforms();
+		return webHervSettings.getPlatforms();
 	}
 
-	public List<SelectItem> getGenomes(){
-		return inputService.getGenomes();
+	public List<SelectItem> getDrumsDirs(){
+		return webHervSettings.getDrumsDirs();
 	}
 
 	public List<SelectItem> getVariants(){
-		return inputService.getVariants();
+		return webHervSettings.getVariants();
 	}	
 
 	// Selected Values Getter and Setter --------------------------------------
@@ -144,15 +145,15 @@ public class UserInput {
 
 	public void setSelectedPlatform(String selectedPlatform) {
 		this.selectedPlatform = selectedPlatform;
-		this.selectedGenome = inputService.getPlatformGenomes().get( this.selectedPlatform );
+		//this.selectedDrums = webHervSettings.getPlatformDrums().get( this.selectedPlatform );
 	}
 
-	public String getSelectedGenome() {
-		return selectedGenome;
+	public String getSelectedDrums() {
+		return selectedDrums;
 	}
 
-	public void setSelectedGenome(String selectedGenome) {
-		this.selectedGenome = selectedGenome;
+	public void setSelectedDrums(String selectedDrums) {
+		this.selectedDrums = selectedDrums;
 	}
 
 	public boolean isSelectedByGenome() {

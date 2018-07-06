@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -25,6 +27,7 @@ import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
+import org.kkruse.webherv.frontpage.PropertiesInputService.DrumsTableProbs;
 import org.kkruse.webherv.frontpage.util.MessagesUtils;
 
 /**
@@ -39,14 +42,23 @@ public class WebHervSettings {
 	/** relative path to the configurations file */
 	private static final String WEB_INF_PORTAL_CONFIG_PROPERTIES = "/WEB-INF/portal-config.properties";
 
+
 	// parameter constants:
-	private static final String DRUMS_DIRECTORY_PATH       = "drums.directory.path";
-	private static final String DRUMS_DATABASES_HERVS_HG18 = "drums.databases.hervs.hg18";
-	private static final String DRUMS_DATABASES_HERVS_HG19 = "drums.databases.hervs.hg19";
+	//private static final String GENOME_IDS = "genome.ids";
+	private static final String DRUMS_DB_IDS = "drums.databases.ids";
+	private static final String DRUMS_DBS    = "drums.databases";
+	private static final String DRUMS_DIRECTORY_PATH  = "drums.directory.path";
+	
 	private static final String DRUMS_DB_GENOME   = "genome";
 	private static final String DRUMS_DB_DIR      = "dir";
 	private static final String DRUMS_DB_ID       = "id";
 	private static final String PLATFORM_DB_PROB  = "platform.exon_array.sqlite.db";
+	private static final String PLATFORM_IDS_PROP = "platform.ids";
+	private static final String PLATFORM_TABLE_PROP = "platform.tables";
+	private static final String PLATFORM_LABEL    = "label";
+	private static final String PLATFORM_TABLE    = "table";
+	private static final String PLATFORM_GENOME   = "genome";
+	
 	private static final String USER_OFFSET_DEF   = "user.offset.list.default";
 	private static final String USER_OFFSET_SEP   = "user.offset.list.separator";
 	private static final String USER_OFFSET_REGEX = "user.offset.list.input_regex";
@@ -64,16 +76,27 @@ public class WebHervSettings {
 	
 	private Path drumsDatabasesFolder;
 	private Map<String, DrumsTableProbs> drumTablePropertiesIdMap;
-	private List<String> databaseParameters = Arrays.asList( DRUMS_DATABASES_HERVS_HG19, DRUMS_DATABASES_HERVS_HG18 );
+	private Map<String, PlatformTableProbs> platformTablePropertiesIdMap;
+	private Map<String, String> dirGenomeMap;
+//	private List<String> databaseParameters = Arrays.asList( DRUMS_DATABASES_HERVS_HG19, DRUMS_DATABASES_HERVS_HG18 );
 	private String platformDb;
 	
-	/**
-	 *  constructor 
-	 */
-	public WebHervSettings(){}
 	
-	@PostConstruct
-	public void init(){
+	private List<SelectItem> variants;
+	private List<SelectItem> ranges;
+	private List<SelectItem> platforms;
+	private List<SelectItem> drumsDirs;
+
+	private String defaultVariant;
+	private String defaultRange;
+	private String defaultPlatform;
+
+	private Map<String, String> platformGenomes;
+	private Map<String, String> platformDrums;	
+	private Map<String, String> platformTable;	
+	
+	public WebHervSettings(){
+		
 		// read the properties file into the configurations
 		try {
 			config = initConfiguration();
@@ -84,22 +107,29 @@ public class WebHervSettings {
 			MessagesUtils.showFatalMsg( null , "Failed to init program configurations!");
 		}
 		
+//		platforms = new ArrayList<>();
+//		platforms.add( new SelectItem( "hg19_HuEx_1_0_st_v2_na32_probeset", "Hg19 Affy Human Exon 1.0v2" ) );
+//		platforms.add( new SelectItem( "hg18_HuEx_1_0_st_v2_na29_probeset", "Hg18 Affy Human Exon 1.0v2") );
+//
+//		platformGenomes = new HashMap<>();
+//		platformGenomes.put( "hg19_HuEx_1_0_st_v2_na32_probeset" , "hervs_hg19");
+//		platformGenomes.put( "hg18_HuEx_1_0_st_v2_na29_probeset" , "hervs_hg18");
+
+		variants = new ArrayList<>();
+		variants.add( new SelectItem( "var2", "All Hervs inside the offset and range." ) );
+		variants.add( new SelectItem( "var1", "Nearest Herv to gene center." ) );
+
+		ranges = new ArrayList<>();
+		ranges.add( new SelectItem( "+/-", "+/- (overlap)", "Range '+/-'  (overlap), the program will only look for sequences in front and behind the probeset." ) );
+		ranges.add( new SelectItem( "+",  "+ (downstream)", "Range '+' (downstream), the program will only look for sequences behind the probeset.") ); 
+		ranges.add( new SelectItem(  "-",  "- (upstream)", "Range '-' (upstream), the program will only look for sequences in front of the probeset." ) );
+
+		defaultPlatform = (String) platforms.get(0).getValue();
+		defaultVariant  = (String) variants.get(0).getValue();
+		defaultRange    = (String) ranges.get(0).getValue();
 	}
 
-//	// ------------------------------------------------------------------------
-//	/**
-//	 * static access to singleton object instance.
-//	 * @return the web herv settings instance.
-//	 * @throws IOException in case reading the properties fails.
-//	 * @throws ConfigurationException in case loading the configurations fails.
-//	 */
-//	public static WebHervSettings getInstance() throws IOException, ConfigurationException{
-//		if( webHervSettings == null ){
-//			webHervSettings = new WebHervSettings();
-//		}
-//		return webHervSettings;
-//	}
-
+	
 	// ------------------------------------------------------------------------
 	/**
 	 * loads the settings from the properties file.
@@ -108,24 +138,31 @@ public class WebHervSettings {
 	 */
 	private void loadSettings( Configuration config ) throws IOException, ConfigurationException{
 
+		drumsDirs = new ArrayList<>();
+		
 		// map that holds the drums db configs:
 		drumTablePropertiesIdMap = new HashMap<>();
+		dirGenomeMap = new HashMap<>();
 		
-		// read the drums db configurations:
-		for( String genome : databaseParameters ){
+		String[] db_ids = config.getStringArray( DRUMS_DB_IDS );
+		
+		for( String id : db_ids ){
+			System.out.println(id);
 
 			DrumsTableProbs tableProbs = new DrumsTableProbs();
-			Configuration databasesConf = config.subset( genome );
-			
+			tableProbs.id = id;
+			Configuration databasesConf = config.subset( DRUMS_DBS+"."+id );
+		
 			Iterator<String> keys = databasesConf.getKeys();
 			while( keys.hasNext() ){
 				String key = keys.next();
 				switch (key) {
-				case DRUMS_DB_ID: 
-					tableProbs.id = databasesConf.getString( key );
-					break;
 				case DRUMS_DB_DIR:
 					tableProbs.dir = databasesConf.getString( key );
+					SelectItem item = new SelectItem( tableProbs.dir,tableProbs.dir );
+					if( ! drumsDirs.contains(item) ){
+						drumsDirs.add( item );
+					}
 					break;
 				case DRUMS_DB_GENOME:
 					tableProbs.hg = databasesConf.getString( key );
@@ -135,8 +172,9 @@ public class WebHervSettings {
 				}
 			}
 			drumTablePropertiesIdMap.put( tableProbs.id, tableProbs );
+			dirGenomeMap.put(tableProbs.dir, tableProbs.hg);
 		}
-
+		
 		// ---------
 		// read the drum database directory path:
 		String drumDirName = config.getString( DRUMS_DIRECTORY_PATH );
@@ -145,8 +183,64 @@ public class WebHervSettings {
 		// ---------
 		// read the platform/array database path:
 		platformDb = config.getString( PLATFORM_DB_PROB, null );
+	
+		platformTablePropertiesIdMap = new HashMap<>();
+		
+		String[] platform_ids = config.getStringArray( PLATFORM_IDS_PROP );
+		
+		for( String id : platform_ids ){
+			System.out.println(id);
+
+			Configuration platformConf = config.subset( PLATFORM_TABLE_PROP+"."+id );
+			PlatformTableProbs platformProps = new PlatformTableProbs();
+			platformProps.id = id;
+			
+			Iterator<String> keys = platformConf.getKeys();
+			while( keys.hasNext() ){
+				String key = keys.next();
+				switch (key) {
+				case PLATFORM_TABLE:
+					platformProps.table = platformConf.getString( key );
+					break;
+				case PLATFORM_LABEL:
+					platformProps.label = platformConf.getString( key );
+					break;
+				case PLATFORM_GENOME:
+					platformProps.genome = platformConf.getString( key );
+					break;
+				default:
+					break;
+				}
+			}
+			
+			platformTablePropertiesIdMap.put( platformProps.id, platformProps );
+		}
+
+		platformDrums = new HashMap<>();
+		
+		
+		platforms = new ArrayList<>();
+		platformGenomes = new HashMap<>();
+		platformTable = new HashMap<>();
+		
+		for( String id : platformTablePropertiesIdMap.keySet() ){
+			PlatformTableProbs props = platformTablePropertiesIdMap.get( id );
+			for( String drumsId : drumTablePropertiesIdMap.keySet() ){
+				DrumsTableProbs dumProps = drumTablePropertiesIdMap.get(drumsId);
+				if( dumProps.hg.equals(props.genome) ){
+					
+					platforms.add( new SelectItem( props.table+"_"+dumProps.id, props.label+"_"+dumProps.id) );			
+					platformGenomes.put( props.table+"_"+dumProps.id , props.genome );
+					platformDrums.put( props.table+"_"+dumProps.id, dumProps.dir );
+					platformTable.put( props.table+"_"+dumProps.id, props.table );
+				}
+			}
+		}
 		
 	}
+
+
+
 
 	//-------------------------------------------------------------------------
 	/**
@@ -159,10 +253,12 @@ public class WebHervSettings {
 
 		PropertiesConfiguration config = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).configure(new Parameters().properties() ).getConfiguration();
 		FileHandler fh = new FileHandler( config );
-		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-		try( InputStream is = ec.getResourceAsStream( WEB_INF_PORTAL_CONFIG_PROPERTIES ) ){
-			fh.load(is);	
-		}
+		if( FacesContext.getCurrentInstance() != null ){
+			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			try( InputStream is = ec.getResourceAsStream( WEB_INF_PORTAL_CONFIG_PROPERTIES ) ){
+				fh.load(is);	
+			}
+		} 
 		return config;
 	}
 	
@@ -172,6 +268,71 @@ public class WebHervSettings {
 		public String id;
 		public String dir;
 		public String hg;
+	}
+	/** */
+	public static class PlatformTableProbs{
+		public String id;
+		public String table;
+		public String label;
+		public String genome;
+	}
+
+	
+	// Getter -----------------------------------------------------------------	
+	public List<SelectItem> getVariants() {
+		return variants;
+	}
+
+	public List<SelectItem> getRanges() {
+		return ranges;
+	}
+
+	public List<SelectItem> getPlatforms() {
+		return platforms;
+	}
+
+	public List<SelectItem> getDrumsDirs() {
+		return drumsDirs;
+	}
+
+	public Map<String, String> getPlatformGenomes() {
+		return platformGenomes;
+	}
+
+	public Map<String, String> getPlatformDrums() {
+		return platformDrums;
+	}
+	
+	public Map<String, String> getPlatformTable() {
+		return platformTable;
+	}
+
+	public String getDefaultRange() {
+		return defaultRange;
+	}
+
+	public String getDefaultVariant() {
+		return defaultVariant;
+	}
+
+
+	public void setDefaultVariant(String defaultVariant) {
+		this.defaultVariant = defaultVariant;
+	}
+
+
+	public void setDefaultRange(String defaultRange) {
+		this.defaultRange = defaultRange;
+	}
+
+
+	public String getDefaultPlatform() {
+		return defaultPlatform;
+	}
+
+
+	public void setDefaultPlatform(String defaultPlatform) {
+		this.defaultPlatform = defaultPlatform;
 	}
 
 	// Getter and Setter ------------------------------------------------------
@@ -183,6 +344,10 @@ public class WebHervSettings {
 		return drumTablePropertiesIdMap;
 	}
 
+	public Map<String, String> getDirGenomeMap() {
+		return dirGenomeMap;
+	}
+	
 	public String getPlatformDb() {
 		return platformDb;
 	}
@@ -234,5 +399,5 @@ public class WebHervSettings {
 	public String getBlastVersion(){
 		return config.getString( BLAST_VERSION, "" );
 	}
-	
+
 }

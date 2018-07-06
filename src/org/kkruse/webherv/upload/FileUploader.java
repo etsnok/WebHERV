@@ -185,8 +185,8 @@ public class FileUploader {
 				for( String[] gene : geneList ){
 					geneIDs.add( gene[0].replace( "\"", "" ) );
 				}
-
-				Map<String, GeneEntry> geneEntriesMap = geneDBConnector.queryGenesById( geneTableName, geneIDs );
+				String tableName = webHervSettings.getPlatformTable().get(geneTableName );
+				Map<String, GeneEntry> geneEntriesMap = geneDBConnector.queryGenesById( tableName, geneIDs );
 				
 				// add probe-sets the were not found in the DB:
 				for( String id : geneIDs ){

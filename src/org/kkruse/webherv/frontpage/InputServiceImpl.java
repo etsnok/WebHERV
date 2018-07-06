@@ -10,7 +10,7 @@ import javax.faces.model.SelectItem;
 /**
  * @author Konstantin Kruse
  */
-public class InputService{
+public class InputServiceImpl implements InputService{
 	
 	private List<SelectItem> variants;
 	private List<SelectItem> ranges;
@@ -24,7 +24,7 @@ public class InputService{
 	private Map<String, String> platformGenomes;
 	
 	//-------------------------------------------------------------------------
-	public InputService(){
+	public InputServiceImpl(){
 		
 		platforms = new ArrayList<>();
 		platforms.add( new SelectItem( "hg19_HuEx_1_0_st_v2_na32_probeset", "Hg19 Affy Human Exon 1.0v2" ) );
@@ -53,46 +53,90 @@ public class InputService{
 	}
 	
 	// Getter -----------------------------------------------------------------	
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getVariants()
+	 */
+	@Override
 	public List<SelectItem> getVariants() {
 		return variants;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getRanges()
+	 */
+	@Override
 	public List<SelectItem> getRanges() {
 		return ranges;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getPlatforms()
+	 */
+	@Override
 	public List<SelectItem> getPlatforms() {
 		return platforms;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getGenomes()
+	 */
+	@Override
 	public List<SelectItem> getGenomes() {
 		return genomes;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getPlatformGenomes()
+	 */
+	@Override
 	public Map<String, String> getPlatformGenomes() {
 		return platformGenomes;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getDefaultRange()
+	 */
+	@Override
 	public String getDefaultRange() {
 		return defaultRange;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getDefaultVariant()
+	 */
+	@Override
 	public String getDefaultVariant() {
 		return defaultVariant;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#setDefaultVariant(java.lang.String)
+	 */
+	@Override
 	public void setDefaultVariant(String defaultVariant) {
 		this.defaultVariant = defaultVariant;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#setDefaultRange(java.lang.String)
+	 */
+	@Override
 	public void setDefaultRange(String defaultRange) {
 		this.defaultRange = defaultRange;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#getDefaultPlatform()
+	 */
+	@Override
 	public String getDefaultPlatform() {
 		return defaultPlatform;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.kkruse.webherv.frontpage.InputService#setDefaultPlatform(java.lang.String)
+	 */
+	@Override
 	public void setDefaultPlatform(String defaultPlatform) {
 		this.defaultPlatform = defaultPlatform;
 	}

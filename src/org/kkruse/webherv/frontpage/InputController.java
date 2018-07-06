@@ -182,6 +182,7 @@ public class InputController {
 		if( tables == null ){
 			try {
 				tables = fileUploader.loadGenesLists( userSettings );
+				//userSettings.selectedGenome = webHervSettings.getPlatformDrums().get(userSettings.selectedGenome);
 			} catch (Exception e1) {
 				LOG.log(Level.WARNING, "Exception while loading gene lists:", e1 );
 				MessagesUtils.showErrorMsg(null, "Exception while loading gene lists:" + e1.getLocalizedMessage()  );
@@ -192,7 +193,7 @@ public class InputController {
 		
 		Map<String, HervService> services = drumsConnector.getDrumsDatabasesServices();
 		Map<String, Map<GeneEntry, Map<Integer, List<HERV>>>> genesFileIdHervsMap = new HashMap<>(); 
-		
+
 		DrumsTableProbs table = webHervSettings.getDrumTablePropertiesIdMap().get( userSettings.selectedGenome );
 		String genomeDir = null;
 		if( table != null ){
