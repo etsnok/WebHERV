@@ -22,6 +22,7 @@ import org.kkruse.webherv.drums.HervService;
 import org.kkruse.webherv.drums.HervService.GeneEntryTables;
 import org.kkruse.webherv.drums.HervService.HervInputSettings;
 import org.kkruse.webherv.drums.HervService.HervServiceException;
+import org.kkruse.webherv.drums.HervService.HervServiceStatus;
 import org.kkruse.webherv.frontpage.results.ResultsTab;
 import org.kkruse.webherv.frontpage.results.ResultsView;
 import org.kkruse.webherv.frontpage.results.ResultsTab.Gene;
@@ -55,6 +56,8 @@ public class InputController {
 	private int finishedFiles;
 	private int genesInCurrentFile;
 	private int finishedGenes;
+	
+	private HervServiceStatus hervServiceStatus; 
 	
 	private GeneEntryTables tables;
 	
@@ -150,7 +153,7 @@ public class InputController {
 
 		userInput.setSelectedByGenome(false);
 		
-		FacesMessage message = new FacesMessage("Succesful", fileName + " is uploaded.");
+		FacesMessage message = new FacesMessage("Successful", fileName + " is uploaded.");
 		FacesContext.getCurrentInstance().addMessage(null, message);
 	}
 
@@ -207,11 +210,15 @@ public class InputController {
 		// get the HervService for the selected genome:
 		HervService hervService = services.get( genomeDir );
 		if( hervService != null ){
+			hervServiceStatus = new HervServiceStatus();
 			try {
 				hervService.openConnection();
 				int count = 0;
+				hervServiceStatus.setUploadedFiles(tables.getGeneEntryTables().size());
+				
 				for( String fileName : tables.getGeneEntryTables().keySet() ){
-					genesFileIdHervsMap.put(fileName, hervService.selectHervsInRange( userInput.currentHervInputSettings(), fileName, tables.getGeneEntryTables() ) );
+					hervServiceStatus.setProcessingFileCount(count+1);
+					genesFileIdHervsMap.put(fileName, hervService.selectHervsInRange( userInput.currentHervInputSettings(), fileName, tables.getGeneEntryTables(), hervServiceStatus ) );
 					if( LOG.isLoggable(Level.FINE) ){LOG.fine("Finished uploaded file:" + fileName);}
 					setFinishedFiles( ++count );
 				}
@@ -238,6 +245,7 @@ public class InputController {
 		// reset the gene list after submitting
 		fileUploader.initNewGeneLists();
 		tables = null;
+		hervServiceStatus = null;
 		
 		return "results?faces-redirect=true"; // navigate to results page
 	}
@@ -394,5 +402,13 @@ public class InputController {
 
 	public void setTables(GeneEntryTables tables) {
 		this.tables = tables;
+	}
+
+	public HervServiceStatus getHervServiceStatus() {
+		return hervServiceStatus;
+	}
+
+	public void setHervServiceStatus(HervServiceStatus hervServiceStatus) {
+		this.hervServiceStatus = hervServiceStatus;
 	}
 }

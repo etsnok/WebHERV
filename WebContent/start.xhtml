@@ -25,25 +25,32 @@
 
 	<!-- main description  -->
 	<p:panel id="explainPanel">
-		<p id="explainPara">This program enables you to analyze the association 
-		between human endogenous retrovirus (HERV) sequences and a set of genome coordinates. 
-		For instance, these coordinates can be obtained from RNAseq or micro-array based 
-		gene expression profiling experiments. 
-		The server allows uploading of files with probe set IDs
-		 (the current version accepts only Affymetrix Human Exon 1.0 ST arrays) or
-		  files with genome coordinates.
-		 The program will analyze each file separately for HERV sequences located in the neighborhood of these probe sets or genome coordinates..</p>
-		<p id="expl_link">For detailed information see Kruse K, Nettling M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018. WebHERV: A web-server for the computational investigation of gene expression associated with human endogenous retroviruses. Front Microbiol. submitted.</p>
+		<p id="explainPara">This program enables you to analyze the
+			association between human endogenous retrovirus (HERV) sequences and
+			a set of genome coordinates. For instance, these coordinates can be
+			obtained from RNAseq or micro-array based gene expression profiling
+			experiments. The server allows uploading of files with probe set IDs
+			(the current version accepts only Affymetrix Human Exon 1.0 ST
+			arrays) or files with genome coordinates. The program will analyze
+			each file separately for HERV sequences located in the neighborhood
+			of these probe sets or genome coordinates..</p>
+		<p id="expl_link">For detailed information see Kruse K, Nettling
+			M, Wappler N, Emmer A, Kornhuber M, Staege MS, Grosse I. 2018.
+			WebHERV: A web-server for the computational investigation of gene
+			expression associated with human endogenous retroviruses. Front
+			Microbiol. submitted.</p>
 
 		<p id="code_links">
-			<h:outputText value="A tutorial for server development and the code for this server can be found here: "/>
+			<h:outputText
+				value="A tutorial for server development and the code for this server can be found here: " />
 			<p:link value="Tutorial and code at GitHub"
 				href="https://github.com/etsnok/WebHERV" target="_blank" />
 			<br />
-			<h:outputText value="Step-by-step user instructions can be found here: "/>
+			<h:outputText
+				value="Step-by-step user instructions can be found here: " />
 			<p:link value="Instructions"
 				href="/resources/docs/InstructionsWebHERV.pdf" target="_blank" />
-	
+
 		</p>
 	</p:panel>
 
@@ -51,7 +58,7 @@
 		enctype="multipart/form-data">
 
 		<p:panelGrid header="Parameter settings" styleClass="settingsPanel"
-			style="margin-top:20px">
+			style="margin-top:20px" id="parameterPanel">
 
 			<!--  layout="grid" -->
 			<f:facet name="header" styleClass="settingsPanel">
@@ -97,12 +104,13 @@
 				The 'Area' defines the region around the genome coordinates or probe set 
 				coordinates in which the program will search for HERV sequences. 
 				<ul>
-						<li>Area 'overlap': the program will search for HERV sequences 
-						upstream and downstream of the probe set or genome coordinates.</li>
-						<li>Area 'downstream': the program will only search for HERV 
-						sequences downstream (3') of the probe set or genome coordinates.</li>
-						<li>Area 'upstream', the program will only search for HERV sequences 
-						upstream (5') of the probe set or genome coordinates.</li>
+						<li>Area 'overlap': the program will search for HERV
+							sequences upstream and downstream of the probe set or genome
+							coordinates.</li>
+						<li>Area 'downstream': the program will only search for HERV
+							sequences downstream (3') of the probe set or genome coordinates.</li>
+						<li>Area 'upstream', the program will only search for HERV
+							sequences upstream (5') of the probe set or genome coordinates.</li>
 					</ul>
 
 				</p:column>
@@ -207,17 +215,24 @@
 			<!-- 			</p:row> -->
 
 
+
+
 			<!-- === TABULATOR ============================================== -->
 			<p:row>
 
 				<p:column colspan="2">
-
+				
+					<div align="center" style="margin:10px">
+    					<h:outputText value="Please select only Genome coordinates OR Probe set IDs for upload" />
+					</div>
+				
 					<p:tabView id="uploadsTab">
 
-						<p:ajax event="tabChange" listener="#{inputController.onTabChange}" update="@this"/>
+						<p:ajax event="tabChange"
+							listener="#{inputController.onTabChange}" update="@this" />
 
 						<!-- === Genome Coordinates Tab ========================================= -->
-						<p:tab title="Genome Coordinates" id="coordinatesTab">
+						<p:tab title="Genome coordinates" id="coordinatesTab">
 
 							<p:panelGrid style="margin-bottom:20px"
 								id="selectGenomePanelGrid">
@@ -235,7 +250,7 @@
 									</p:column>
 									<p:column styleClass="col_description">
 										'Genome' allows the selection of different genome 
-										versions (currently available: HG18, HG19) for 
+										versions (currently available: HG18, HG19, RepeatMasker LTRs HG19) for 
 										the coordinates of HERV-like sequences.
 									</p:column>
 								</p:row>
@@ -243,7 +258,7 @@
 							</p:panelGrid>
 
 							<h:outputText
-								value="Upload genome coordinates of the selected genome version:" />
+								value="Here you can upload genome coordinates of your differentially expressed genes in the selected genome version (HG18, HG19 or RepeatMasker LTRs HG19)." />
 							<ul>
 								<li>Each line must contain only one genome position.</li>
 								<li>Format: chromosome[TAB]start[TAB]end[TAB]strand.</li>
@@ -307,22 +322,24 @@
 							<!-- Example File Upload -->
 							<h:outputText value="Example genome coordinates file:" />
 							<br />
-							<p:link value="Example file"
-								href="/resources/example_files/test_genome_coordinates.txt"
-								target="_blank" />
-							<br />
-							<p:link value="Example file B_cells_up_10x"
-								href="/resources/example_files/B_cells_up_10x_coordinates.txt"
-								target="_blank" />
-							<br />
-							<p:link value="Example file HL_up_10x"
-								href="/resources/example_files/HL_up_10x_coordinates.txt"
-								target="_blank" />
+							<ul>
+								<li><p:link value="Example_coordinates_B"
+										href="/resources/example_files/Example_coordinates_B.txt"
+										target="_blank" /> <h:outputText
+										value=" : genome coordinates of probe sets up-regulated in normal blood cells in comparison to Hodgkin lymphoma cells." />
+
+								</li>
+								<li><p:link value="Example_coordinates_H"
+										href="/resources/example_files/Example_coordinates_H.txt"
+										target="_blank" /> <h:outputText
+										value=" : genome coordinates of probe sets up-regulated in Hodgkin lymphoma cells in comparison to normal blood cells." />
+								</li>
+							</ul>
 
 						</p:tab>
 
 
-						<p:tab title="Upload probe set IDs" id="probesetsTab">
+						<p:tab title="Probe set IDs" id="probesetsTab">
 
 							<p:panelGrid style="margin-bottom:20px">
 
@@ -338,7 +355,7 @@
 
 									</p:column>
 									<p:column styleClass="col_description">
-												'Platform' allows the selection of different combinations of genome versions (HG18, HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2).
+												'Platform' allows the selection of different combinations of genome versions (HG18, HG19, RepeatMasker LTRs HG19) and arrays (currently only Affymetrix Human Exon 1.0 ST library version 2).
 									</p:column>
 								</p:row>
 
@@ -346,7 +363,7 @@
 
 
 							<h:outputText
-								value="Upload lists with probe set IDs of the selected platform:" />
+								value="Here you can upload lists with probe set IDs of your differentially expressed genes in the selected genome version (HG18, HG19 or RepeatMasker LTRs HG19)." />
 							<ul>
 								<li>Press 'Choose' to select a file.</li>
 								<li>Press 'Upload' to upload the files.</li>
@@ -396,13 +413,18 @@
 
 							<!-- Example File Upload -->
 							<h:outputText value="Example probe set ID files:" />
-							<br />
-							<p:link value="Example file HL_up_10x_ps"
-								href="/resources/example_files/HL_up_10x_ps.txt" target="_blank" />
-							<br />
-							<p:link value="Example file 2"
-								href="/resources/example_files/B_cells_up_10x_ps.txt" target="_blank" />
-
+							<ul>
+								<li><p:link value="Example_probe_set_file_H"
+										href="/resources/example_files/Example_probe_set_file_H.txt"
+										target="_blank" /> <h:outputText
+										value=" : IDs from probe sets up-regulated in Hodgkin lymphoma cells in comparison to normal blood cells." />
+								</li>
+								<li><p:link value="Example_probe_set_file_B"
+										href="/resources/example_files/Example_probe_set_file_B.txt"
+										target="_blank" /> <h:outputText
+										value=" : IDs from probe sets up-regulated in normal blood cells in comparison to Hodgkin lymphoma cells." />
+								</li>
+							</ul>
 						</p:tab>
 
 					</p:tabView>
@@ -471,18 +493,24 @@
 					<!-- 					</p:panel> -->
 				</p:column>
 
-				<p:ajaxStatus onstart="PF('statusDialog').show()"
-					onsuccess="PF('statusDialog').hide()" />
+				<p:ajaxStatus onstart="PF('statusDialog').show();"
+					onsuccess="PF('statusDialog').hide();"
+				 />
 
-				<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+				<p:dialog widgetVar="statusDialog" id="statusDialogId" modal="true" draggable="false"
 					closable="false" resizable="false" showHeader="false">
 					<p:graphicImage value="/resources/images/ajaxloadingbar.gif" />
+<!-- 					<h:outputText id="statusTxt" rendered="#{inputController.hervServiceStatus != null}" -->
+<!-- 									value="Files: #{inputController.hervServiceStatus.uploadedFiles}"/> -->
+<!-- 					<p:poll interval="1" widgetVar="statusPoller" update="statusTxt" autoStart="false"/> -->
 				</p:dialog>
 
 
 			</p:row>
 
 		</p:panelGrid>
+
+<!--		<p:poll interval="1" async="true" widgetVar="statusPoller" update="statusTxt" autoStart="false"/>-->
 
 	</h:form>
 

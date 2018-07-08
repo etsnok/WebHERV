@@ -183,6 +183,11 @@ public class DrumsHervService implements HervService {
 
 	@Override
 	public Map<GeneEntry, Map<Integer, List<HERV>>> selectHervsInRange( HervInputSettings inputSettings, String geneFile,  Map<String, List<GeneEntry>> geneEntryTable ) throws HervServiceException{
+		return selectHervsInRange(inputSettings, geneFile, geneEntryTable, null);
+	}
+
+	@Override
+	public Map<GeneEntry, Map<Integer, List<HERV>>> selectHervsInRange( HervInputSettings inputSettings, String geneFile,  Map<String, List<GeneEntry>> geneEntryTable, HervServiceStatus status ) throws HervServiceException{
 
 		if( globalParameters == null ){
 			try {
@@ -204,6 +209,8 @@ public class DrumsHervService implements HervService {
 			
 			// get the list of genes/probesets
 			List<GeneEntry> geneEntries = geneEntryTable.get( geneFile );
+			if(status != null){ status.setCurrCoordinatesTotal(geneEntries.size()); }
+			
 			int count = 0;
 			for( GeneEntry geneEntry : geneEntries ){
 
@@ -249,7 +256,7 @@ public class DrumsHervService implements HervService {
 				if( count % 500 == 0 && count > 0 ){
 					LOG.info( "Finished:" + count +" of:" + geneEntries.size() );
 				}
-
+				if(status != null){ status.setCurrCoordinatesCount( count ); }
 			}
 
 		} catch ( IOException | InterruptedException e ) {

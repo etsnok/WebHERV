@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -229,7 +230,7 @@ public class FileUploader {
 			List<String[]> geneList = uploadedGeneLists.get( geneListName );
 			List<GeneEntry> genes = new ArrayList<>();
 			
-			List<String[]> failedGeneList = new ArrayList<>();
+			Map<String[],Exception> failedGeneList = new LinkedHashMap<>();
 			
 			int countFailed = 0; // number all failed line
 			int lineIdx = 1;
@@ -249,10 +250,14 @@ public class FileUploader {
 
 						if( STRAND_RGX.matcher( gene[3] ).matches() ){
 							entry.setStrand(gene[3]);
-						} else { throw new InputMismatchException( "Starnd must be one of (+,-,1,+1,-1) not:"+ gene[3] ); }
-						genes.add(entry);
+						} else { throw new InputMismatchException( "Strand must be one of (+,-,1,+1,-1) not:"+ gene[3] ); }
+						
+						if( st < en ){
+							genes.add(entry);
+						} else {  throw new InputMismatchException("Start position ("+st+") must be smaller than end ("+en+")"); }
+						
 					} catch ( Exception e){
-						failedGeneList.add(gene);
+						failedGeneList.put(gene, e);
 						countFailed++;
 					}
 				} else {
@@ -270,8 +275,10 @@ public class FileUploader {
 		    if( failedGeneList != null && failedGeneList.size() > 0 ){
 
 		    	String failsMsgStr = "";
-		    	for( String[] fg : failedGeneList ){
-		    		failsMsgStr += StringUtils.join(fg, " ")+"\n";
+		    	for( String[] fg : failedGeneList.keySet() ){
+		    		Exception e = failedGeneList.containsKey(fg)?failedGeneList.get(fg):null;
+		    		
+		    		failsMsgStr += StringUtils.join(fg, " ")+(e!=null?e.getMessage():"")+"\n";
 		    	}
 		    	
 		    	context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, geneListName,  "Read :"+(lineIdx-countFailed)+" lines skipped:"+countFailed + "\n" +failsMsgStr ) );

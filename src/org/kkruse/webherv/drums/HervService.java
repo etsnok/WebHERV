@@ -22,6 +22,57 @@ public interface HervService extends Closeable{
 	
 	public Map<GeneEntry, Map<Integer, List<HERV>>> selectHervsInRange( HervInputSettings inputSettings, String geneFile,  Map<String, List<GeneEntry>> geneEntryTable ) throws HervServiceException;
 
+	public Map<GeneEntry, Map<Integer, List<HERV>>> selectHervsInRange( HervInputSettings inputSettings, String geneFile,  Map<String, List<GeneEntry>> geneEntryTable, HervServiceStatus status ) throws HervServiceException;
+
+	
+	public static class HervServiceStatus{
+		private int uploadedFiles;
+		private int processingFileCount;
+		private int currCoordinatesTotal;
+		private int currCoordinatesCount;
+		
+		public HervServiceStatus(){
+			uploadedFiles = 0;
+			processingFileCount = 0;
+			currCoordinatesTotal = 0;
+			currCoordinatesCount = 0;			
+		}
+		
+		public int getUploadedFiles() {
+			return uploadedFiles;
+		}
+
+		public void setUploadedFiles(int uploadedFiles) {
+			this.uploadedFiles = uploadedFiles;
+		}
+
+		public int getProcessingFileCount() {
+			return processingFileCount;
+		}
+
+		public void setProcessingFileCount(int processingFileCount) {
+			this.processingFileCount = processingFileCount;
+		}
+
+		public int getCurrCoordinatesTotal() {
+			return currCoordinatesTotal;
+		}
+
+		public void setCurrCoordinatesTotal(int currCoordinatesTotal) {
+			this.currCoordinatesTotal = currCoordinatesTotal;
+		}
+
+		public int getCurrCoordinatesCount() {
+			return currCoordinatesCount;
+		}
+
+		public void setCurrCoordinatesCount(int currCoordinatesCount) {
+			this.currCoordinatesCount = currCoordinatesCount;
+		}
+
+	}
+	
+	
 	public static class HervServiceException extends Exception{
 		private static final long serialVersionUID = 1L;
 
@@ -98,3 +149,4 @@ public interface HervService extends Closeable{
 
 
 }
+
