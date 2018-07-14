@@ -171,7 +171,7 @@ public class WebHervSettings {
 					break;
 				}
 			}
-			drumTablePropertiesIdMap.put( tableProbs.id, tableProbs );
+			drumTablePropertiesIdMap.put( tableProbs.dir, tableProbs );
 			dirGenomeMap.put(tableProbs.dir, tableProbs.hg);
 		}
 		

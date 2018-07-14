@@ -185,7 +185,7 @@ public class InputController {
 		if( tables == null ){
 			try {
 				tables = fileUploader.loadGenesLists( userSettings );
-				//userSettings.selectedGenome = webHervSettings.getPlatformDrums().get(userSettings.selectedGenome);
+				userSettings.selectedGenome = webHervSettings.getPlatformDrums().get(userSettings.selectedPlatform);
 			} catch (Exception e1) {
 				LOG.log(Level.WARNING, "Exception while loading gene lists:", e1 );
 				MessagesUtils.showErrorMsg(null, "Exception while loading gene lists:" + e1.getLocalizedMessage()  );

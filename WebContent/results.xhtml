@@ -82,7 +82,7 @@
 						<h:outputText value="#{rowId}" />
 					</p:column>
 					
-					<p:column headerText="Probe set ID">
+					<p:column headerText="#{userInput.selectedByGenome? 'Genome coordinates' : 'Probe set ID'}">
 						<h:outputText value="#{gene.id}" />
 					</p:column>
 
@@ -107,7 +107,7 @@
 		</p:tabView>
 
 		<!-- === Herv Dialog ==================================================== -->
-		<p:dialog header="Hits in distance (#{geneSelectionView.selectedOffset}) of probe set:#{geneSelectionView.selectedGene.id}" widgetVar="dlg1" id="geneDetail"
+		<p:dialog header="Hits in distance (#{geneSelectionView.selectedOffset}) of #{userInput.selectedByGenome? 'genome coordinates' : 'Probe set ID'}:#{geneSelectionView.selectedGene.id}" widgetVar="dlg1" id="geneDetail"
 			minHeight="40" width="700">
 
 			<p:panelGrid columns="2">
@@ -134,9 +134,9 @@
 			<p:dataTable id="hervHitDT" var="hervHit"
 				value="#{geneSelectionView.selectedGene.offsetHervHits[geneSelectionView.selectedOffset].hervHits}"
 				scrollable="true" scrollHeight="350">
-				<p:column headerText="HERV ID">
-					<h:outputText value="#{hervHit.id}" />
-				</p:column>
+<!-- 				<p:column headerText="HERV ID"> -->
+<!-- 					<h:outputText value="#{hervHit.id}" /> -->
+<!-- 				</p:column> -->
 				<p:column headerText="Chromosome">
 					<h:outputText value="#{hervHit.chromosome}" />
 				</p:column>
