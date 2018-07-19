@@ -343,7 +343,7 @@ public class DrumsHervService implements HervService {
 
 					for( Integer offset : filteredRange.keySet() ){
 
-						if( range.equals( "+/-" ) && herv.getEndPositionChromosome() >= ( geneEntry.start - offset ) && herv.getStartPositionChromosome() <= ( geneEntry.start + offset ) ){
+						if( range.equals( "+/-" ) && herv.getEndPositionChromosome() >= ( geneEntry.getStart() - offset ) && herv.getStartPositionChromosome() <= ( geneEntry.getEnd() + offset ) ){
 							filteredRange.get( offset ).add( herv );
 						} else if( range.equals( "+" ) ){
 							if( geneEntry.strand.equals( "+" ) && herv.getStartPositionChromosome() <= ( geneEntry.getEnd() + offset ) && herv.getEndPositionChromosome() >= geneEntry.getStart() ){
