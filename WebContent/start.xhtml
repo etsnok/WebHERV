@@ -58,11 +58,16 @@
 			<p:link value="Instructions"
 				href="/resources/docs/InstructionsWebHERV.pdf" target="_blank" />
 
-		</p>
+		</p>		
+		
 	</p:panel>
+
+
 
 	<h:form name="settingsForm" id="settingsFormId"
 		enctype="multipart/form-data">
+
+
 
 		<p:panelGrid header="Parameter settings" styleClass="settingsPanel"
 			style="margin-top:20px" id="parameterPanel">
@@ -229,26 +234,29 @@
 
 				<p:column colspan="2">
 				
-					<div align="center" style="margin:10px">
-    					<h:outputText value="Please select only Genome coordinates OR Probe set IDs for upload" />
-					</div>
+					<p:panel style="text-align: center;">
+    					<p>Please select only Genome coordinates OR Probe set IDs for upload.</p>
+    					<p style="font-size:15px;">NOTE: delete all uploaded files to switch to another upload tab.</p>
+					</p:panel>
 				
 					<p:tabView id="uploadsTab">
 
-						<p:ajax event="tabChange"
-							listener="#{inputController.onTabChange}" update="@this" />
+<!-- 						<p:ajax event="tabChange" text-align: center-->
+<!--  							listener="#{inputController.onTabChange}"/> -->
 
 						<!-- === Genome Coordinates Tab ========================================= -->
-						<p:tab title="Genome coordinates" id="coordinatesTab">
+						<p:tab title="Genome coordinates" id="coordinatesTab"	
+						 		disabled="#{fileUploader.uploadedGeneLists != null and not empty fileUploader.uploadedGeneLists}">
+
 
 							<p:panelGrid style="margin-bottom:20px"
 								id="selectGenomePanelGrid">
 
 								<p:row>
-									<p:column>
+									<p:column style="vertical-align:middle">
 										<h:outputLabel for="genomeItem" value="Genome:" />
 										<br />
-										<p:selectOneMenu id="genomeItem"
+										<p:selectOneMenu id="genomeItem" style="vertical-align:middle; text-align: center"
 											value="#{userInput.selectedDrums}">
 											<f:selectItems var="p" value="#{userInput.drumsDirs}"
 												itemLabel="#{p.label}" itemValue="#{p.id}" />
@@ -277,10 +285,11 @@
 								<li>Press 'Upload' to upload the files.</li>
 							</ul>
 
-
 							<p:fileUpload id="coordinatesUpload" sequential="true"
-								update="test growl"
+								update="settingsFormId:uploadsTab growl"
+								process="uploadsTab"
 								fileUploadListener="#{inputController.handleCoordinatesFileUpload}"
+								oncomplete="#{genomePosTabsView.loadData()}"
 								mode="advanced" dragDropSupport="false" multiple="true"
 								fileLimit="10" />
 
@@ -291,8 +300,11 @@
 									id="genomePosTabView" var="genomeTab"
 									activeIndex="#{genomePosTabsView.tabIndex}">
 
-									<p:ajax event="tabClose"
+									<p:ajax event="tabClose" update="settingsFormId:uploadsTab"
 										listener="#{genomePosTabsView.onTabClose}" />
+									<p:ajax event="tabChange"  
+											update="genomePosTabView" /> 
+	
 
 									<p:tab title="#{genomeTab.filename}" closable="true"
 										id="genomePosFilesTab">
@@ -312,7 +324,7 @@
 											</p:column>
 
 											<p:column headerText="Strand">
-												<h:outputText value="#{pos.strand}" />
+												<h:outputText value="#{pos.strand.label}" />
 											</p:column>
 										</p:dataTable>
 
@@ -322,8 +334,9 @@
 								<p:commandButton value="Submit positions" id="submitPosButton"
 									action="#{inputController.submitUpload}"
 									update="coordinatesTab"
+									process="@form"
 									disabled="#{empty genomePosTabsView.genomePosTabs}" />
-
+<!-- 	process="settingsFormId:uploadsTab" -->
 							</p:panel>
 
 							<!-- Example File Upload -->
@@ -338,7 +351,8 @@
 								</li>
 								<li><p:link value="Example_coordinates_H"
 										href="/resources/example_files/Example_coordinates_H.txt"
-										target="_blank" /> <h:outputText
+										target="_blank" />
+										 <h:outputText 
 										value=" : genome coordinates of probe sets up-regulated in Hodgkin lymphoma cells in comparison to normal blood cells." />
 								</li>
 							</ul>
@@ -346,9 +360,9 @@
 						</p:tab>
 
 
-						<p:tab title="Probe set IDs" id="probesetsTab">
+						<p:tab title="Probe set IDs" id="probesetsTab" disabled="#{inputController.tables != null and not empty inputController.tables.geneEntryTables}">
 
-							<p:panelGrid style="margin-bottom:20px">
+							<p:panelGrid style="margin-bottom:20px" id="selectProbeSetsGrid">
 
 								<p:row>
 									<p:column>
@@ -376,10 +390,12 @@
 								<li>Press 'Upload' to upload the files.</li>
 							</ul>
 
-							<p:messages id="fileUploadMsg" autoUpdate="true" closable="true" />
+							<!-- <p:messages id="fileUploadMsg" autoUpdate="true" closable="true" />  -->
 
+								<!-- update="uploadedFilesPanel growl fileUploadMsg submitFilesButton" uploadedFilesPanel growl fileUploadMsg submitFilesButton-->
 							<p:fileUpload id="fileIdPhoto"
-								update="uploadedFilesPanel growl fileUploadMsg submitFilesButton"
+								update="settingsFormId:uploadsTab growl"
+								process="uploadsTab"
 								sequential="true"
 								fileUploadListener="#{inputController.handleFileUpload}"
 								mode="advanced" dragDropSupport="false" multiple="true"
@@ -403,7 +419,7 @@
 										<h:outputText value="#{file}" />
 									</p:column>
 									<p:column style="width:10px;">
-										<p:commandLink update="uploadedFilesList"
+										<p:commandLink update="settingsFormId:uploadsTab"
 											actionListener="#{fileUploadView.deleteFileByName(file)}"
 											title="Delete file" styleClass="ui-icon ui-icon-close"
 											style="float:left;margin-right:10px">
@@ -413,7 +429,8 @@
 
 								<p:commandButton value="Submit files" id="submitFilesButton"
 									action="#{inputController.submitUpload}"
-									update="uploadedFilesPanel probesetsTab"
+									update="@form"
+									process="@form"
 									disabled="#{empty fileUploader.uploadedGeneLists}" />
 
 							</p:panel>

@@ -63,13 +63,16 @@
 						<p:ajax update=":resultsForm:resultsTabView:basicDT"
 							listener="#{tab.updateFilteredGenes}" />
 					</p:selectBooleanCheckbox>
+				
+					<p:outputLabel value="Export results:" for="exportCsvCmdLink"/>	
+					<h:commandLink id="exportCsvCmdLink">
+						<p:graphicImage value="resources/images/csv.png" />
+						<p:dataExporter type="csv" target="basicDT"
+							fileName="#{tab.id}_hervs"  />
+					</h:commandLink>
+					
 				</h:panelGrid>
 
-				<h:commandLink>
-					<p:graphicImage value="resources/images/csv.png" />
-					<p:dataExporter type="csv" target="basicDT"
-						fileName="#{tab.id}_hervs"  />
-				</h:commandLink>
 
 				<!-- Gene results / HERVs -->
 				<p:dataTable id="basicDT" var="gene" value="#{tab.filteredGenes}"
@@ -125,7 +128,7 @@
 
 				<h:outputText value="Strand:" />
 				<h:outputText
-					value="#{geneSelectionView.selectedGene.geneEntry.strand}" />
+					value="#{geneSelectionView.selectedGene.geneEntry.strand.label}" />
 
 			</p:panelGrid>
 

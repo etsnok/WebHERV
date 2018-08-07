@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.kkruse.webherv.genes.sqlite.GeneDBConnector.GeneEntry;
+import org.kkruse.webherv.genes.sqlite.GeneDBConnector.Strand;
 
 import com.unister.semweb.biodrums.herv.HERV;
 import com.unister.semweb.drums.DRUMSParameterSet;
@@ -101,13 +102,13 @@ public class DrumsHervService implements HervService {
 		int rangeStart;
 		int rangeEnd;
 
-		if( "+".equals( geneEntry.strand ) ){
+		if( Strand.PLUS == geneEntry.strand ){
 			rangeStart =  geneEntry.start - rangeSize - longestHerv;
 			rangeEnd   = geneEntry.end + longestHerv;
-		} else if( "-".equals( geneEntry.strand ) ){
+		} else if( Strand.MINUS == geneEntry.strand ){
 			rangeStart = geneEntry.start - longestHerv;
 			rangeEnd   = geneEntry.end + rangeSize + longestHerv;
-		} else {
+		} else { 
 			throw new IllegalStateException( "Ivalide stand gene type:'" + geneEntry.strand + "'" );
 		}
 
@@ -139,10 +140,10 @@ public class DrumsHervService implements HervService {
 		int rangeStart; // start position of the query range
 		int rangeEnd;   // end position of the query range
 
-		if( "+".equals( geneEntry.strand ) ){
+		if( Strand.PLUS == geneEntry.strand ){
 			rangeStart = geneEntry.start - longestHerv;
 			rangeEnd   = geneEntry.end + rangeSize + longestHerv;
-		} else if( "-".equals( geneEntry.strand ) ){
+		} else if( Strand.MINUS == geneEntry.strand ){
 			rangeStart = geneEntry.start - rangeSize - longestHerv;
 			rangeEnd   = geneEntry.end + longestHerv;
 		} else {
@@ -337,24 +338,36 @@ public class DrumsHervService implements HervService {
 			//			while( rangeIterator.hasNext() ) {
 			//				HERV herv = rangeIterator.next();
 			for( HERV herv : range1 ){
-
-				int hervLength = herv.getEndPositionChromosome() - herv.getStartPositionChromosome() + 1;
+	
+				int hervStart = -1;
+				int hervEnd   = -1;
+				
+				if( herv.getEndPositionChromosome() > herv.getStartPositionChromosome() ){
+					hervStart = herv.getStartPositionChromosome();
+					hervEnd   = herv.getEndPositionChromosome();				
+				} else {
+					hervEnd   = herv.getStartPositionChromosome();
+					hervStart = herv.getEndPositionChromosome();									
+				}
+				
+				int hervLength = hervEnd - hervStart + 1;
+				
 				if( herv.getEValue() <= maxEval && hervLength >= minLength ) {
 
 					for( Integer offset : filteredRange.keySet() ){
 
-						if( range.equals( "+/-" ) && herv.getEndPositionChromosome() >= ( geneEntry.getStart() - offset ) && herv.getStartPositionChromosome() <= ( geneEntry.getEnd() + offset ) ){
+						if( range.equals( "+/-" ) && hervEnd >= ( geneEntry.getStart() - offset ) && hervStart <= ( geneEntry.getEnd() + offset ) ){
 							filteredRange.get( offset ).add( herv );
 						} else if( range.equals( "+" ) ){
-							if( geneEntry.strand.equals( "+" ) && herv.getStartPositionChromosome() <= ( geneEntry.getEnd() + offset ) && herv.getEndPositionChromosome() >= geneEntry.getStart() ){
+							if( geneEntry.strand == Strand.PLUS && hervStart <= ( geneEntry.getEnd() + offset ) && hervEnd >= geneEntry.getStart() ){
 								filteredRange.get( offset ).add( herv );
-							} else if( geneEntry.strand.equals( "-" ) && herv.getEndPositionChromosome() >= ( geneEntry.getStart() - offset ) && herv.getStartPositionChromosome() <= geneEntry.getEnd() ){
+							} else if( geneEntry.strand == Strand.MINUS && hervEnd >= ( geneEntry.getStart() - offset ) && hervStart <= geneEntry.getEnd() ){
 								filteredRange.get( offset ).add( herv );
 							}
 						} else if( range.equals( "-" ) ){
-							if( geneEntry.strand.equals( "+" ) && herv.getEndPositionChromosome() >= ( geneEntry.getStart() - offset ) && herv.getStartPositionChromosome() <= geneEntry.getStart() ){
+							if( geneEntry.strand == Strand.PLUS && hervEnd >= ( geneEntry.getStart() - offset ) && hervStart <= geneEntry.getStart() ){
 								filteredRange.get( offset ).add( herv );
-							} else if ( geneEntry.strand.equals( "-" ) && herv.getStartPositionChromosome() <= ( geneEntry.getEnd() + offset ) && herv.getEndPositionChromosome() >= geneEntry.getEnd() ){
+							} else if ( geneEntry.strand == Strand.MINUS && hervStart <= ( geneEntry.getEnd() + offset ) && hervEnd >= geneEntry.getEnd() ){
 								filteredRange.get( offset ).add( herv );
 							}
 						}

@@ -180,9 +180,13 @@ public class InputController {
 		if( LOG.isLoggable(Level.FINE) ){LOG.fine( "SubmitingUpload" );	}
 		
 		HervInputSettings userSettings = userInput.currentHervInputSettings();
+
+		if( LOG.isLoggable(Level.FINE) ){LOG.fine( "With input settings:" + userSettings.toString() );	}
+		
 		// Load the data for the gene lists:
 //		GeneEntryTables tables;
 		if( tables == null ){
+			if(LOG.isLoggable(Level.FINE)) LOG.fine("Loading tables from fileuploader.");
 			try {
 				tables = fileUploader.loadGenesLists( userSettings );
 				userSettings.selectedGenome = webHervSettings.getPlatformDrums().get(userSettings.selectedPlatform);
@@ -209,6 +213,7 @@ public class InputController {
 		
 		// get the HervService for the selected genome:
 		HervService hervService = services.get( genomeDir );
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("Got hervService by genomeDir:'"+genomeDir+"'");
 		if( hervService != null ){
 			hervServiceStatus = new HervServiceStatus();
 			try {
@@ -243,9 +248,9 @@ public class InputController {
 		resultsView.setResultsTabs( resultsTabs );
 
 		// reset the gene list after submitting
-		fileUploader.initNewGeneLists();
+//		fileUploader.initNewGeneLists();
 		tables = null;
-		hervServiceStatus = null;
+//		hervServiceStatus = null;
 		
 		return "results?faces-redirect=true"; // navigate to results page
 	}
@@ -348,20 +353,25 @@ public class InputController {
 	}
 	
 	public void deleteTableByName( String name ){
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("name:'"+name+"'");
 		if( tables != null && tables.getGeneEntryTables() != null
 				&& tables.getGeneEntryTables().containsKey(name) ){
 			tables.getGeneEntryTables().remove(name);
 			fileUploader.getUploadedGeneLists().remove(name);
+			
+			if(LOG.isLoggable(Level.FINE)) LOG.fine("Deleted file from gene entry tables and uploaded fiel list.");	
 		}
 	}
 	
 	public void onTabChange(TabChangeEvent event) {
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("TabChangeEvent:" + event.toString());
 		if( tables != null && tables.getGeneEntryTables() != null && tables.getGeneEntryTables().size() > 0 ){
 			tables.getGeneEntryTables().clear();// = null;
+			if(LOG.isLoggable(Level.FINE)) LOG.fine("TabChangeEvent: cleared gene entry tables.");
 		}
 		fileUploader.initNewGeneLists();
 	}
-	
+
 	
 	// === Getter and Setter =========================================================
 	public int getUploadedFiles() {

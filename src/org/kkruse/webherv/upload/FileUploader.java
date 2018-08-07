@@ -32,6 +32,7 @@ import org.kkruse.webherv.drums.HervService.HervInputSettings;
 import org.kkruse.webherv.frontpage.util.MessagesUtils;
 import org.kkruse.webherv.genes.sqlite.GeneDBConnector;
 import org.kkruse.webherv.genes.sqlite.GeneDBConnector.GeneEntry;
+import org.kkruse.webherv.genes.sqlite.GeneDBConnector.Strand;
 import org.kkruse.webherv.genes.sqlite.SqliteHg19DbConnector;
 import org.kkruse.webherv.settings.WebHervSettings;
 import org.primefaces.model.UploadedFile;
@@ -249,7 +250,7 @@ public class FileUploader {
 						} else{ throw new NumberFormatException("End must be >= 0 :"+ st); }
 
 						if( STRAND_RGX.matcher( gene[3] ).matches() ){
-							entry.setStrand(gene[3]);
+							entry.setStrand(Strand.getStrand(gene[3]));
 						} else { throw new InputMismatchException( "Strand must be one of (+,-,1,+1,-1) not:"+ gene[3] ); }
 						
 						if( st < en ){

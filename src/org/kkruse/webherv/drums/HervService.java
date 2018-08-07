@@ -110,6 +110,13 @@ public interface HervService extends Closeable{
 			this.minimalLength = minimalLength;
 			this.maxEvalue = maxEvalue;
 		}
+
+		@Override
+		public String toString() {
+			return "HervInputSettings [offset=" + offset + ", selectedRange=" + selectedRange + ", selectedPlatform="
+					+ selectedPlatform + ", selectedGenome=" + selectedGenome + ", selectedVariant=" + selectedVariant
+					+ ", minimalLength=" + minimalLength + ", maxEvalue=" + maxEvalue + "]";
+		}
 	}
 
 	public static class GeneEntryTables{

@@ -2,6 +2,8 @@ package org.kkruse.webherv.frontpage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -10,12 +12,15 @@ import javax.faces.bean.ViewScoped;
 
 import org.kkruse.webherv.drums.HervService.GeneEntryTables;
 import org.kkruse.webherv.genes.sqlite.GeneDBConnector.GeneEntry;
+import org.kkruse.webherv.upload.FileUploader;
 import org.primefaces.event.TabCloseEvent;
 
 @ManagedBean( name="genomePosTabsView" )
 @ViewScoped
 public class GenomePosTabsView {
-
+	
+	private static final Logger LOG = Logger.getLogger( GenomePosTabsView.class.getName() );
+	
 	private List<GenomePosTab> genomePosTabs;
 
 	@ManagedProperty( value="#{inputController}" )
@@ -26,10 +31,13 @@ public class GenomePosTabsView {
 	@PostConstruct
 	public void init(){
 		loadData();
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("Initialized");
 	}
 
 	
-	private void loadData(){
+	public void loadData(){
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("Loading genomePosTabs");
+		
 		GeneEntryTables tables = inputController.getTables();
 		
 		if( tables != null ){
@@ -43,12 +51,15 @@ public class GenomePosTabsView {
 				List<GeneEntry> genes = tables.getGeneEntryTables().get(filename);
 				tab.setGenomePos(genes);
 			}		
+		} else {
+			if(LOG.isLoggable(Level.FINE)) LOG.fine("GeneEntryTable are null.");
 		}
 	}
 
 
 	public List<GenomePosTab> getGenomePosTabs() {
-		loadData();
+		if(LOG.isLoggable(Level.FINE)) LOG.fine("GET genomePosTabs");
+		//loadData();
 		return genomePosTabs;
 	}
 

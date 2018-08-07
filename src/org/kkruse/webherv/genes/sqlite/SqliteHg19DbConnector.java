@@ -112,7 +112,7 @@ public class SqliteHg19DbConnector implements GeneDBConnector {
 								newEntry.probeSet   = result.getString( 1 );
 								newEntry.start      = result.getInt( 2 );
 								newEntry.end        = result.getInt( 3 );
-								newEntry.strand     = result.getString( 4 );
+								newEntry.strand     = Strand.getStrand(result.getString( 4 ));
 								newEntry.chromosome = result.getString( 5 );
 								genes.put( newEntry.probeSet, newEntry );
 							}
