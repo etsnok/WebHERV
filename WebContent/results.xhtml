@@ -43,9 +43,13 @@
 					<h:outputText id="totUploadedProbs" value="#{tab.totalNumGenes}" />
 					<h:outputLabel for="uploadedProbs" value="Elements with coordinates:" />
 					<h:outputText id="uploadedProbs" value="#{tab.knownNumGenes}" />
-					<h:outputLabel value="With results:" />
+				
+					<h:outputLabel value="With results within distance(s):"/>
+				
 					<ui:repeat value="#{tab.resultsNumGenes}" var="pair">
-    					Distance #{pair.left}:#{pair.right}
+    					<h:outputText id="test" value=" #{pair.left}:#{pair.right}"/>
+				 		<p:tooltip id="toolTipFade4" for="test" value="#{pair.right} elements found in a distance of #{pair.left}." position="top"/>
+					
 					</ui:repeat>
 				</h:panelGrid>
 
@@ -73,6 +77,9 @@
 					
 				</h:panelGrid>
 
+				<p:tooltip id="toolTipFade1" for=":resultsForm:resultsTabView:basicDT:headerNum" value="Numerical counter of the uploaded elements." position="top"/>
+				<p:tooltip id="toolTipFade2" for=":resultsForm:resultsTabView:basicDT:headerId" value="Genome coordinate or probe set ID" position="top"/>
+
 
 				<!-- Gene results / HERVs -->
 				<p:dataTable id="basicDT" var="gene" value="#{tab.filteredGenes}"
@@ -81,18 +88,20 @@
 					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
 					rowsPerPageTemplate="50,100,200,500" >
 
-					<p:column headerText="num">
-						<h:outputText value="#{rowId}" />
+					<p:column id="headerNum" headerText="num">
+						<h:outputText value="#{rowId + 1}" />
 					</p:column>
+ 
 					
-					<p:column headerText="#{userInput.selectedByGenome? 'Genome coordinates' : 'Probe set ID'}">
+					<p:column id="headerId" headerText="#{userInput.selectedByGenome? 'Genome coordinates' : 'Probe set ID'}">
 						<h:outputText value="#{gene.id}" />
 					</p:column>
 
-					<p:columns value="#{tab.columns}" var="column"
+					<p:columns id="distCols" value="#{tab.columns}" var="column"
 						columnIndexVar="colIndex">
-						<f:facet name="header">
-							<h:outputText value="#{column.header}" />
+						<f:facet name="header" id="headerDistances">
+							<h:outputText id="headerDistancesHead" value="#{column.header}" title="#{column.header}"/>
+							 		<p:tooltip id="toolTipFade3" for="headerDistancesHead" value="Genomic distance searched for HERVs or LTRs and number of hits." position="top"/>
 						</f:facet>
 						<p:commandLink update=":resultsForm:geneDetail"
 							oncomplete="PF('dlg1').show()"
