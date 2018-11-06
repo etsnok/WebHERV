@@ -185,7 +185,9 @@ public class FileUploader {
 				List<String> geneIDs = new ArrayList<>();
 
 				for( String[] gene : geneList ){
-					geneIDs.add( gene[0].replace( "\"", "" ) );
+					if(gene != null && gene.length>0){						
+						geneIDs.add( gene[0].replace( "\"", "" ) );
+					}
 				}
 				String tableName = webHervSettings.getPlatformTable().get(geneTableName );
 				Map<String, GeneEntry> geneEntriesMap = geneDBConnector.queryGenesById( tableName, geneIDs );
